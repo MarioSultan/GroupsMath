@@ -10,18 +10,19 @@
 
 #################### IMPORTS ####################
 
-import  numpy               as      np
 import  matplotlib.pyplot   as      plt
 import  matplotlib.colors   as      mcolors
-from    itertools           import  permutations, combinations, product
-from    collections         import  Counter
-from    math                import  gcd
+import  numpy               as      np
 from    abc                 import  abstractmethod, ABC
+from    collections         import  Counter
+from    itertools           import  permutations, combinations, product
+from    math                import  gcd
 
 
 #################### DEFINITIONS ####################
 
-__version__ = "0.4.1"
+__version__ = "0.5.0"
+__errorcolor__ = "\033[31m"
 
 tgl_color = "#2A646E"
 white = mcolors.LinearSegmentedColormap.from_list("white", ["white", "white"])
@@ -40,11 +41,11 @@ def info():
     print("for working with finite groups and their algebraic properties.             ")
     print("                                                                           ")
     print("You can view all the information of the proyect in PyPI and GitHub:        ")
-    print("· PyPI https://pypi.org/project/GroupsMath/                                ")
-    print("· GitHub https://github.com/MarioSultan/GroupsMath                         ")
+    print("· PyPI \033[36mhttps://pypi.org/project/GroupsMath/ \033[0m                               ")
+    print("· GitHub \033[36mhttps://github.com/MarioSultan/GroupsMath \033[0m                        ")
     print("                                                                           ")
     print("The documentation of this library is in the following link:                ")
-    print("· Documentation https://github.com/MarioSultan/GroupsMath/tree/main/docs   ")
+    print("· Documentation \033[36mhttps://github.com/MarioSultan/GroupsMath/tree/main/docs \033[0m  ")
     print("                                                                           ")
     print("———————————————————————————————————————————————————————————————————————————")
 
@@ -72,12 +73,12 @@ class ExplicitGroup(Group):
     def __init__(self, elements, function, _skip_validation=False):
 
         if type(elements)!=list:
-            raise ValueError("The first argument of a ExplicitGroup instance must be a list")
+            raise ValueError(__errorcolor__+"The first argument of a ExplicitGroup instance must be a list")
 
         if not _skip_validation:
             valid, message = _check_explicit_group(elements,function)
             if not valid:
-                raise ValueError(message)
+                raise ValueError(__errorcolor__+message)
 
         self.elements = elements
         self.function = function
@@ -85,7 +86,7 @@ class ExplicitGroup(Group):
     #–> DUNDERS 
 
     def __str__(self):
-        return str(self.toCayleyGroup())
+        return str(self._cayley())
     
     def __len__(self):
         return len(self.elements)
@@ -100,7 +101,7 @@ class ExplicitGroup(Group):
         return direct_power(self.toCayleyGroup(),n).toExplicitGroup()
     
     def __truediv__(self, subgroup):
-        return self.toCayleyGroup().quotient(subgroup.toCayleyGroup()).toExplicitGroup()
+        return self.quotient(subgroup)
 
     #–> TRANSFORMING METHODS 
 
@@ -108,6 +109,9 @@ class ExplicitGroup(Group):
         idx = {elem: i for i, elem in enumerate(self.elements)}
         cayley = [[idx[self.function(a, b)] for b in self.elements] for a in self.elements]
         return CayleyGroup(cayley, self.elements, _skip_validation=True)
+
+    def _cayley(self):
+        return [[self.function(a, b) for b in self.elements] for a in self.elements]
 
     #–> GROUP METHODS 
     
@@ -177,26 +181,68 @@ class ExplicitGroup(Group):
     def is_abelian(self):
         return self.order()==len(self.center())
 
-    def cayley_table(self, title="", colormap=rainbow, names=None):
-        return self.toCayleyGroup().cayley_table(self, title=title, colormap=colormap, names=names)
+    def cayley_table(self, title="", colormap=rainbow, names=None, math_mode=True):
+        return self.toCayleyGroup().cayley_table(title=title, colormap=colormap, names=names, math_mode=math_mode)
 
     #–> SUBGROUPS 
 
-    def proper_subgroups(self):             # PROGRAMAR
-        return self.toCayleyGroup().proper_subgroups()
+    def proper_subgroups(self):
+        E = self.elements
+        O = self.element_orders()
+        #print(O)
+        L = []
 
-    def subgroups(self):                    # PROGRAMAR
-        return self.toCayleyGroup().subgroups()
+        def is_closed(elem,func):
+            elem_to_idx = {el: i for i, el in enumerate(elem)}
+            cayley_indices = [[0] * len(elem) for _ in range(len(elem))]
+            for i in range(len(elem)):
+                a = elem[i]
+                for j in range(len(elem)):
+                    res = func(a, elem[j])
+                    if res not in elem_to_idx:
+                        return False
+                    cayley_indices[i][j] = elem_to_idx[res]
+            return True
+        
+        for idxs in _graded_power_set_with_id(O):
+            # 1. Comprobación rápida de clausura
+            if is_closed(idxs, self.function):
+                # 2. Construcción rápida omitiendo axiomas heredados
+                sub_elements = [E[j] for j in idxs]
+                
+                sub_grp = ExplicitGroup(sub_elements, self.function, _skip_validation=True)
+                L.append(ExplicitSubgroup(sub_grp, self))
+                
+        return L
 
-    def normal_subgroups(self):             # PROGRAMAR
-        return self.toCayleyGroup().normal_subgroups()
+    def subgroups(self):
+        # 1. Subgrupo trivial {e}
+        e_name = self.elements[self.identity()]
+        trivial_grp = ExplicitGroup([e_name], self.function)
+        trivial_subgroup = ExplicitSubgroup(trivial_grp, self)
 
-    def is_simple(self):                    # PROGRAMAR
-        return self.toCayleyGroup().is_simple()
+        # 2. Subgrupos propios
+        subs = self.proper_subgroups()
 
-    def quotient(self, subgroup):           # PROGRAMAR
-        return self.toCayleyGroup().quotient(subgroup.toCayleyGroup())
+        # 3. Subgrupo total (el propio grupo G)
+        total_subgroup = ExplicitSubgroup(self, self)
 
+        return [trivial_subgroup] + subs + [total_subgroup]
+
+    def normal_subgroups(self):
+        return [sub for sub in self.subgroups() if sub.is_normal()]
+
+    def is_simple(self):
+        normals = self.normal_subgroups()
+        return len(normals) == 2
+
+    def quotient(self, subgroup):
+        if not isinstance(subgroup, ExplicitSubgroup):
+            raise TypeError(__errorcolor__+"Argument must be an instance of ExplicitSubgroup")
+        if subgroup.group is not self:
+            raise ValueError(__errorcolor__+"The subgroup does not belong to this group")
+        return subgroup.quotient()
+    
     #–> AUTOMORPHISMS 
 
     def is_automorphism(self, phi):
@@ -221,7 +267,7 @@ class CayleyGroup(Group):
             elements = list(range(len(cayley)))
 
         if len(elements) != len(cayley):
-            raise ValueError("The number of elements must match the group order")
+            raise ValueError(__errorcolor__+"The number of elements must match the group order")
 
         self.cayley = cayley
         self.elements = elements
@@ -333,7 +379,7 @@ class CayleyGroup(Group):
     def is_abelian(self):
         return self.order()==len(self.center())
 
-    def cayley_table(self, title="", colormap=rainbow, names=None):
+    def cayley_table(self, title="", colormap=rainbow, names=None, math_mode=True):
 
         if names==None:
             if len(self.cayley)<=20:
@@ -347,7 +393,10 @@ class CayleyGroup(Group):
         im = ax.imshow(self.cayley, cmap=colormap)
         ax.xaxis.tick_top()
 
-        names_in_axis = [f"${i}$" for i in self.elements]
+        if math_mode:
+            names_in_axis = [f"${i}$" for i in self.elements]
+        else:
+            names_in_axis = [f"{i}" for i in self.elements]
 
         if names:
             ax.set_xticks(np.arange(len(elements)))
@@ -361,18 +410,32 @@ class CayleyGroup(Group):
             ax.set_yticklabels([])
 
         if names:
-            for i in range(len(elements)):
-                for j in range(len(elements)):
-                    color_texto = "black"
-                    ax.text(
-                        i,
-                        j,
-                        f"${self.elements[self.cayley[j][i]]}$",
-                        ha="center",
-                        va="center",
-                        color=color_texto,
-                        fontsize=12,
-                    )
+            if math_mode:
+                for i in range(len(elements)):
+                    for j in range(len(elements)):
+                        color_texto = "black"
+                        ax.text(
+                            i,
+                            j,
+                            fr"${self.elements[self.cayley[j][i]]}$",
+                            ha="center",
+                            va="center",
+                            color=color_texto,
+                            fontsize=12,
+                        )
+            else:
+                for i in range(len(elements)):
+                                for j in range(len(elements)):
+                                    color_texto = "black"
+                                    ax.text(
+                                        i,
+                                        j,
+                                        fr"{self.elements[self.cayley[j][i]]}",
+                                        ha="center",
+                                        va="center",
+                                        color=color_texto,
+                                        fontsize=12,
+                                    )
         
         plt.title(title)
         plt.tight_layout()
@@ -386,9 +449,10 @@ class CayleyGroup(Group):
     def proper_subgroups(self):
         G = self.cayley
         E = self.elements
+        O = self.element_orders()
         L = []
         
-        for idxs in _graded_power_set_with_id(G):
+        for idxs in _graded_power_set_with_id(O):
             # 1. Comprobación rápida de clausura
             if _is_closed_subset(G, idxs):
                 # 2. Construcción rápida omitiendo axiomas heredados
@@ -402,7 +466,7 @@ class CayleyGroup(Group):
 
     def subgroups(self):
         # 1. Subgrupo trivial {e}
-        e_name = self.elements[0]
+        e_name = self.elements[self.identity()]
         trivial_grp = CayleyGroup([[0]], [e_name])
         trivial_subgroup = CayleySubgroup(trivial_grp, self)
 
@@ -424,9 +488,9 @@ class CayleyGroup(Group):
 
     def quotient(self, subgroup):
         if not isinstance(subgroup, CayleySubgroup):
-            raise TypeError("Argument must be an instance of CayleySubgroup")
+            raise TypeError(__errorcolor__+"Argument must be an instance of CayleySubgroup")
         if subgroup.group is not self:
-            raise ValueError("The subgroup does not belong to this group")
+            raise ValueError(__errorcolor__+"The subgroup does not belong to this group")
         return subgroup.quotient()
 
     #–> AUTOMORPHISMS 
@@ -488,25 +552,122 @@ class CayleyGroup(Group):
         names_aut = [str(auts[i]) for i in range(n)]
         return CayleyGroup(cayley_aut, names_aut, _skip_validation=True)
 
-#class MatrixGroup(Group)
-
 class Subgroup(ABC):
     pass
+
+class ExplicitSubgroup(ExplicitGroup, Subgroup):
+
+    def __init__(self, subgroup: ExplicitGroup, group: ExplicitGroup):
+        if not isinstance(subgroup, ExplicitGroup) or not isinstance(group, ExplicitGroup):
+            raise ValueError(__errorcolor__+"Both arguments must be instances of ExplicitGroup")
+
+        try:
+            subgroup_indices = [group.elements.index(name) for name in subgroup.elements]
+        except ValueError:
+            raise ValueError(__errorcolor__+"All elements of subgroup must belong to group")
+
+        self.subgroup = subgroup
+        self.group = group
+        self.gelements = group.elements
+        self._indices = subgroup_indices
+        
+        super().__init__(subgroup.elements, group.function, _skip_validation=True)
+
+    #–> DUNDERS 
+
+    def __truediv__(self, other):
+        return self.quotient()
+
+    def __le__(self, group):
+        return group == self.group
+
+    def __lt__(self, group):
+        return group == self.group and self.subgroup.order() < self.group.order()
+
+    #–> QUOTIENTS & COSETS
+
+    def coset(self, element, side="left", return_names=True):
+        if side not in ("left", "right"):
+            raise ValueError(__errorcolor__+"side must be either 'left' or 'right'")
+
+        try:
+            elem_idx = self.gelements.index(element)
+        except ValueError:
+            raise ValueError(__errorcolor__+f"Element '{element}' is not present in parent group elements.")
+
+        coset_indices = []
+        for h_idx in self._indices:
+            h = self.gelements[h_idx]
+            ah = self.function(element, h) if side == "left" else self.function(h, element)
+            ah_idx = self.gelements.index(ah)
+            if ah_idx not in coset_indices:
+                coset_indices.append(ah_idx)
+
+        coset_indices.sort()
+
+        if return_names:
+            return [self.gelements[i] for i in coset_indices]
+        return coset_indices
+
+    def is_normal(self):
+        for name in self.gelements:
+            left = self.coset(name, side="left", return_names=False)
+            right = self.coset(name, side="right", return_names=False)
+            if left != right:
+                return False
+        return True
+
+    def quotient(self):
+        """Calcula el grupo cociente G/H devolviendo una instancia de ExplicitGroup."""
+        if not self.is_normal():
+            raise ValueError(__errorcolor__+"The subgroup must be normal to construct a quotient group.")
+
+        # 1. Obtener todas las clases laterales (cosets) únicas expresadas como listas de nombres
+        cosets = []
+        for name in self.gelements:
+            c = self.coset(name, side="left", return_names=True)
+            if c not in cosets:
+                cosets.append(c)
+
+        # 2. Mapear cada elemento de G al índice de su clase lateral en 'cosets'
+        elem_to_coset = {}
+        for idx, c in enumerate(cosets):
+            for name in c:
+                elem_to_coset[name] = idx
+
+        # 3. Formatear nombres como strings idénticos a CayleyGroup ("{e,r}")
+        quotient_names = [f"{{{','.join(str(e) for e in c)}}}" for c in cosets]
+
+        # 4. Definir la función de operación para ExplicitGroup operando con strings
+        name_to_idx = {name: i for i, name in enumerate(quotient_names)}
+
+        def quotient_op(coset_name_a, coset_name_b):
+            c1_idx = name_to_idx[coset_name_a]
+            c2_idx = name_to_idx[coset_name_b]
+            
+            rep1 = cosets[c1_idx][0]
+            rep2 = cosets[c2_idx][0]
+            
+            prod = self.function(rep1, rep2)
+            res_coset_idx = elem_to_coset[prod]
+            return quotient_names[res_coset_idx]
+
+        return ExplicitGroup(quotient_names, quotient_op, _skip_validation=True)
 
 class CayleySubgroup(CayleyGroup, Subgroup):
 
     def __init__(self, subgroup:CayleyGroup, group:CayleyGroup):
 
         if not isinstance(subgroup, CayleyGroup) or not isinstance(group, CayleyGroup):
-            raise ValueError("Both arguments must be instances of CayleyGroup")
+            raise ValueError(__errorcolor__+"Both arguments must be instances of CayleyGroup")
 
         try:
             subgroup_indices = [group.elements.index(name) for name in subgroup.elements]
         except ValueError:
-            raise ValueError("All elements of subgroup must belong to group")
+            raise ValueError(__errorcolor__+"All elements of subgroup must belong to group")
 
         if not _form_subgroup(group.cayley, subgroup_indices):
-            raise ValueError("The provided group is not a valid subgroup of the main group")
+            raise ValueError(__errorcolor__+"The provided group is not a valid subgroup of the main group")
 
         # Todo lo que se puede hacer con grupos ahora también con subgrupos.
         super().__init__(subgroup.cayley, subgroup.elements)
@@ -535,13 +696,13 @@ class CayleySubgroup(CayleyGroup, Subgroup):
 
     def coset(self, element, side="left", return_names=True):
         if side not in ("left", "right"):
-            raise ValueError("side must be either 'left' or 'right'")
+            raise ValueError(__errorcolor__+"side must be either 'left' or 'right'")
 
         # Buscar directamente la primera aparición del elemento en los nombres del grupo padre
         try:
             elem_idx = self.gelements.index(element)
         except ValueError:
-            raise ValueError(f"Element '{element}' is not present in parent group names.")
+            raise ValueError(__errorcolor__+f"Element '{element}' is not present in parent group names.")
 
         coset_indices = []
         for h in self._indices:
@@ -566,7 +727,7 @@ class CayleySubgroup(CayleyGroup, Subgroup):
     def quotient(self):
         """Calcula el grupo cociente G/H devolviendo una instancia de CayleyGroup."""
         if not self.is_normal():
-            raise ValueError("The subgroup must be normal to construct a quotient group.")
+            raise ValueError(__errorcolor__+"The subgroup must be normal to construct a quotient group.")
 
         # 1. Obtener todas las clases laterales (cosets) únicas expresadas como listas de nombres
         cosets = []
@@ -601,71 +762,72 @@ class CayleySubgroup(CayleyGroup, Subgroup):
 
         return CayleyGroup(quotient_cayley, quotient_names, _skip_validation=True)
 
-#class ExplicitSubgroup(ExplicitGroup, Subgroup)
-
-#class MatrixSubgroup(MatrixGroup, Subgroup)
-
 class Element:
 
-    def __init__(self,element,group):
+    def __init__(self, element, group):
 
-        if not isinstance(group, CayleyGroup):
-            raise TypeError("Argument must be an instance of CayleyGroup")
+        if not isinstance(group, Group):
+            raise TypeError(__errorcolor__+"Argument must be an instance of Group")
 
-        if not element in group:
-            raise ValueError("The element must belong to the group.")
+        if element not in group:
+            raise ValueError(__errorcolor__+"The element must belong to the group.")
 
         self.element = element
         self.group = group
-        self.index = group.elements.index(element)
+
+        # Gestión segura del índice según la naturaleza del grupo
+        if hasattr(group, "elements") and isinstance(group.elements, list):
+            self.index = group.elements.index(element)
+        else:
+            self.index = None
 
     #–> DUNDERS 
 
     def __str__(self):
-        return self.element
+        return str(self.element)
 
     def __mul__(self, other):
-        return Element(self.group.elements[self.group.cayley[self.index][other.index]],self.group)
+        if self.group != other.group:
+            raise ValueError(__errorcolor__+"Elements belong to different groups.")
 
-    def __pow__(self,k):
-        if type(k)!=int:
-            raise ValueError("n must be an integer")
-        if k==1:
-            return self
-        elif k>1:
-            p = self
-            for i in range(k-1):
-                p = p * self
-            return p
-        elif k==0:
-            return Element(self.group.identity(),self.group)
-        elif k==-1:
-            return self.inverse()
-        elif k<-1:
-            p = self.inverse()
-            for i in range(k-1):
-                p = p * self
-            return p
+        if self.index is not None and other.index is not None:
+            res_idx = self.group.operation(self.index, other.index)
+            return Element(self.group.elements[res_idx], self.group)
+        
+        res_elem = self.group.operation(self.element, other.element)
+        return Element(res_elem, self.group)
 
-    def __eq__(self,other):
-        return self.element==other.element and self.group==other.group
+    def __pow__(self, k: int):
+        if not isinstance(k, int):
+            raise ValueError(__errorcolor__+"n must be an integer")
+        if k == 0:
+            return Element(self.group.identity(), self.group)
+        
+        base = self if k > 0 else self.inverse()
+        p = base
+        for _ in range(abs(k) - 1):
+            p = p * base
+        return p
+
+    def __eq__(self, other):
+        if not isinstance(other, Element):
+            return False
+        if isinstance(self.element, np.ndarray) or isinstance(other.element, np.ndarray):
+            return np.allclose(self.element, other.element) and self.group == other.group
+        return self.element == other.element and self.group == other.group
 
     #–> OTHER FUNCTIONS 
 
     def inverse(self):
-        inv = None
-        for i in self.group.elements:
-            if self*Element(i,self.group)==Element(self.group.elements[self.group.identity()],self.group):
-                inv = i
-                break
-        return Element(inv,self.group)
+        inv = self.group.inverse(self.element)
+        return Element(inv, self.group)
 
 class Automorphism:
 
     def __init__(self,phi:tuple,group:CayleyGroup):
 
         if not group.is_automorphism(phi):
-            raise ValueError("The tuple phi has to be an automorphism of G.")
+            raise ValueError(__errorcolor__+"The tuple phi has to be an automorphism of G.")
 
         self.phi = phi
         self.group = group
@@ -685,10 +847,10 @@ class AutomorphismFunction:
                 f.append(i.phi)
             elif type(i)==tuple:
                 if not group.is_automorphism(i):
-                    raise ValueError("The transformation is not a valid automorfism for this group.")
+                    raise ValueError(__errorcolor__+"The transformation is not a valid automorfism for this group.")
                 f.append(i)
             else:
-                raise TypeError("The argument must be a list of a Automorphisms or tuples.")
+                raise TypeError(__errorcolor__+"The argument must be a list of a Automorphisms or tuples.")
             
         self.phi = f
         self.group = group
@@ -915,30 +1077,12 @@ def _min_div(n):
             return i
     return n
 
-def _graded_power_set_with_id(G):
+def _graded_power_set_with_id(orders):
 
     # Principios
-    n = len(G)
+    n = len(orders)
     m = _min_div(n)
-    e = _identity(G)
-
-    def compute_orders(G):
-
-        if not _check_cayley_group(G)[0]:
-            raise TypeError
-
-        O = []
-        for i in range(len(G)):
-            ik = G[i][i]
-            o = 1
-            while i!=ik:
-                ik = G[ik][i]
-                o+=1
-            O.append(o)
-
-        return O
-
-    orders = compute_orders(G)
+    e = orders.index(1)
 
     # Posibles órdenes de subgrupos (Lagrange)
     R = []
@@ -1208,7 +1352,7 @@ def dicyclic_group(n):
     Presentación: <a, x | a^(2n) = 1, x^2 = a^n, x^-1 a x = a^-1>
     """
     if n < 1:
-        raise ValueError("n debe ser un entero positivo")
+        raise ValueError(__errorcolor__+"n debe ser un entero positivo")
         
     # Elementos representados como pares (k, e) donde 0 <= k < 2n y e en {0, 1}
     # (k, 0) -> a^k
@@ -1256,7 +1400,8 @@ def icosahedral_group():
 
 #################### VISUALIZATION AND RENAMING HELPERS ####################
 
-def cayley_table(G, title="", colormap=rainbow, names="", renaming=[]):
+def cayley_table(G, title="", colormap=rainbow, names="", renaming=[], math_mode=True):
+
     if title=="":
         if _obtener_nombre(G)==None:
             title = f"Cayley table"
@@ -1268,7 +1413,10 @@ def cayley_table(G, title="", colormap=rainbow, names="", renaming=[]):
         else:
             names=False
     if renaming==[]:
-        renaming = [rf"${e}$" for e in range(len(G))]
+        if math_mode:
+            renaming = [rf"${e}$" for e in range(len(G))]
+        else:
+            renaming = [rf"{e}" for e in range(len(G))]
 
     elements = range(len(G))
     fig, ax = plt.subplots(figsize=(6, 5))
