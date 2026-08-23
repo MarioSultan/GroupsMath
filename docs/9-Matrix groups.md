@@ -2,7 +2,11 @@
 
 In **GroupsMath**, matrix groups are represented by the `MatrixGroup` class. Unlike a `CayleyGroup`, which is defined by a complete Cayley table, a matrix group is defined directly by its matrix dimension, underlying field, and an optional membership condition.
 
-The group operation is matrix multiplication.
+To use the `MatrixGroup` class and all of its features, you have to install it previously.
+
+```python
+from groupsmath.matrixgroups import *
+```
 
 ---
 
@@ -24,7 +28,7 @@ where:
 For example:
 
 ```python
-from groupsmath import MatrixGroup
+from groupsmath.matrixgroups import MatrixGroup
 
 G = MatrixGroup(3, field="R")
 ```
@@ -59,6 +63,31 @@ For convenience, a prime integer can also be passed directly: `G = MatrixGroup(2
 
 ---
 
+## Custom matrix groups
+
+The `condition` parameter can be used to define custom matrix groups.
+
+The condition receives a NumPy matrix and must return `True` or `False`.
+
+For example, invertible diagonal $3\times3$ real matrices can be represented by:
+
+```python
+import numpy as np
+from groupsmath.matrixgroups import MatrixGroup
+
+G = MatrixGroup(
+    3,
+    field="R",
+    condition=lambda A: np.allclose(A, np.diag(np.diag(A)))
+)
+```
+
+A matrix belongs to this group only if it is invertible and satisfies the additional condition.
+
+
+
+---
+
 ## Membership
 
 The Python `in` operator checks whether a matrix belongs to a matrix group:
@@ -78,7 +107,7 @@ For example:
 
 ```python
 import numpy as np
-from groupsmath import GL
+from groupsmath.matrixgroups import GL
 
 G = GL(2)
 
@@ -210,6 +239,27 @@ The resulting `ExplicitGroup` contains the matrix elements explicitly and uses m
 
 ---
 
+## The `MatrixSubgroup` class
+
+Matrix subgroups are represented by:
+
+```python
+MatrixSubgroup(subgroup, group)
+```
+
+Both arguments must be instances of `MatrixGroup`.
+
+The subgroup and its parent group must have:
+
+* The same matrix dimension.
+* The same field.
+* The same value of `p` when working over $\mathbb{F}_p$.
+
+A `MatrixSubgroup` inherits from both `MatrixGroup` and `Subgroup`.
+
+
+---
+
 # Standard matrix groups
 
 GroupsMath includes constructors for several important families of matrix groups.
@@ -231,7 +281,7 @@ $$
 For example:
 
 ```python
-from groupsmath import GL
+from groupsmath.matrixgroups import GL
 
 G = GL(3)
 ```
@@ -263,7 +313,7 @@ $$
 For example:
 
 ```python
-from groupsmath import SL
+from groupsmath.matrixgroups import SL
 
 G = SL(3)
 G = SL(2, 5)
@@ -276,7 +326,7 @@ For finite fields, the determinant condition is interpreted modulo $p$.
 ## Orthogonal groups: `O`
 
 ```python
-O(n, field="R")
+O(n, field="R", p=None)
 ```
 
 Matrices in the orthogonal group satisfy:
@@ -288,7 +338,7 @@ $$
 For example:
 
 ```python
-from groupsmath import O
+from groupsmath.matrixgroups import O
 
 G = O(3)
 ```
@@ -302,7 +352,7 @@ It also rejects even dimensions because a Witt index is not yet part of the cons
 ## Special orthogonal groups: `SO`
 
 ```python
-SO(n, field="R")
+SO(n, field="R", p=None)
 ```
 
 Matrices satisfy:
@@ -316,7 +366,7 @@ $$
 For example:
 
 ```python
-from groupsmath import SO
+from groupsmath.matrixgroups import SO
 
 G = SO(3)
 ```
@@ -342,7 +392,7 @@ where $A^\dagger$ is the conjugate transpose.
 For example:
 
 ```python
-from groupsmath import U
+from groupsmath.matrixgroups import U
 
 G = U(3)
 ```
@@ -368,7 +418,7 @@ $$
 For example:
 
 ```python
-from groupsmath import SU
+from groupsmath.matrixgroups import SU
 
 G = SU(2)
 ```
@@ -380,7 +430,7 @@ constructs $SU(2)$.
 ## Symplectic groups: `Sp`
 
 ```python
-Sp(n)
+Sp(n, field="R", p=None)
 ```
 
 The matrix dimension must be even.
@@ -404,7 +454,7 @@ $$
 For example:
 
 ```python
-from groupsmath import Sp
+from groupsmath.matrixgroups import Sp
 
 G = Sp(4)
 ```
@@ -413,48 +463,6 @@ constructs the real symplectic group of $4\times4$ matrices, usually denoted $Sp
 
 An odd dimension raises a `ValueError`.
 
----
-
-# The `MatrixSubgroup` class
-
-Matrix subgroups are represented by:
-
-```python
-MatrixSubgroup(subgroup, group)
-```
-
-Both arguments must be instances of `MatrixGroup`.
-
-The subgroup and its parent group must have:
-
-* The same matrix dimension.
-* The same field.
-* The same value of `p` when working over $\mathbb{F}_p$.
-
-A `MatrixSubgroup` inherits from both `MatrixGroup` and `Subgroup`.
-
----
-
-## Custom matrix groups
-
-The `condition` parameter can be used to define custom matrix groups.
-
-The condition receives a NumPy matrix and must return `True` or `False`.
-
-For example, invertible diagonal $3\times3$ real matrices can be represented by:
-
-```python
-import numpy as np
-from groupsmath import MatrixGroup
-
-G = MatrixGroup(
-    3,
-    field="R",
-    condition=lambda A: np.allclose(A, np.diag(np.diag(A)))
-)
-```
-
-A matrix belongs to this group only if it is invertible and satisfies the additional condition.
 
 ---
 
@@ -463,7 +471,7 @@ A matrix belongs to this group only if it is invertible and satisfies the additi
 The following example constructs a finite matrix group:
 
 ```python
-from groupsmath import GL
+from groupsmath.matrixgroups import GL
 
 G = GL(2, 2)
 
