@@ -3,7 +3,7 @@
 ![GroupsMath Logo](https://raw.githubusercontent.com/MarioSultan/GroupsMath/main/logo.png)
 
 
-**GroupsMath** is a Python module for constructing, studying, and manipulating finite (and infinite) groups.
+**GroupsMath** is a Python module for constructing, studying, and manipulating finite and infinite groups.
 
 The project aims to provide a simple and intuitive interface for working with finite groups and their algebraic properties.
 
@@ -13,9 +13,7 @@ The project aims to provide a simple and intuitive interface for working with fi
 
 ## Installation
 
-GroupsMath is currently distributed through PyPI and GitHub.
-
-To install the latest released version from PyPI, run:
+GroupsMath is currently distributed through [PyPI](https://pypi.org/project/GroupsMath/) and [Github](https://github.com/MarioSultan/GroupsMath). To install the latest released version from PyPI, run:
 
 ```bash
 pip install groupsmath
@@ -36,15 +34,15 @@ or visit https://github.com/MarioSultan/GroupsMath and download all the files.
 ### A program in GroupsMath
 ```python
 import groupsmath as gm
-from groupsmath.precooked import S3
+from groupsmath.precooked import S3, A4, C3
 
 #Calculating properties of the group S3
 
-print(S3.order())           # 6
-print(S3.elements)          # ['e', '(23)', '(12)', '(123)', '(132)', '(13)']
-print(S3.element_orders())  # [1, 2, 2, 3, 3, 2]
-print(S3.is_cyclic())       # False
-print(S3.is_abelian())      # False
+print(S3.order())               # 6
+print(S3.elements)              # ['e', '(23)', '(12)', '(123)', '(132)', '(13)']
+print(S3.element_orders())      # [1, 2, 2, 3, 3, 2]
+print(S3.is_cyclic())           # False
+print(S3.is_abelian())          # False
 
 #Generating Cayley table of S3
 
@@ -52,12 +50,12 @@ S3.cayley_table()
 
 #Generating the Cayley table of the direct product A4xC3
 
-G = A4 * C3                 # Product group
+G = A4 * C3                     # Product group
 G.cayley_table()
 
 #Generating the group of units U1200 and its Cayley table
 
-U1200 = units_group()       # Create the group
+U1200 = gm.units_group(1200)    # Create the group
 U1200.cayley_table()
 ```
 
@@ -75,7 +73,7 @@ U1200.cayley_table()
 
 ## Features
 
-GroupsMath is designed to provide tools for working with finite groups, including:
+GroupsMath is designed to provide tools for working with finite (and infinite) groups, including:
 
 **GROUPS:**
 * Construction of finite groups with classes `CayleyGroup` and `ExplicitGroup`.
@@ -112,10 +110,10 @@ The available functionality will expand as the project develops.
 ## Coming soon
 
 The GroupsMath team is currently working on theese ideas:
-* Presentation of groups and generators.
-* Free groups and free products.
+* Presentation of groups, generators and class `PresentedGroup`.
+* Free groups $F_n$ and free products.
 * Optimization of actual features.
-* Representation theory
+* Representation theory.
 * and much more...
 
 ---
@@ -130,7 +128,7 @@ Detailed documentation is available in the [`docs`](https://github.com/MarioSult
 
 GroupsMath is currently under active development.
 
-The project has successfully transitioned to an object-oriented interface centered around the `Group` class. The legacy function-based interface is being removed for future versions. The API should therefore be considered **unstable** until the `1.0.0` release, and breaking changes may occur between development versions.
+The project has successfully transitioned to an object-oriented interface centered around the `Group` class. The legacy function-based interface is being removed for future versions. The API should therefore be considered unstable until the `1.0.0` release, and breaking changes may occur between development versions.
 
 ---
 
