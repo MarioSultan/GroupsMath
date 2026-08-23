@@ -116,17 +116,17 @@ class ExplicitGroup(Group):
     #–> GROUP METHODS 
     
     def operation(self, a, b):
-        return self.function(self.elements[a],self.elements[b])
+        return self.function(a,b)
 
     def identity(self):
         neutro = None
-        for e in range(self.order()):
+        for e in self.elements:
             ok = True
-            for a in range(self.order()):
-                if self.function(e,a) != a:
+            for a in self.elements:
+                if self.operation(e,a) != a:
                     ok = False
                     break
-                if self.function(e,a) != a:
+                if self.operation(e,a) != a:
                     ok = False
                     break
             if ok:
@@ -137,8 +137,8 @@ class ExplicitGroup(Group):
     def inverse(self, a):
         e = self.identity()
         inv = None
-        for i in self.order():
-            if self.function(a,i)==e:
+        for i in self.elements:
+            if self.operation(a,i)==e:
                 inv = i
                 break
         return inv
@@ -261,7 +261,7 @@ class CayleyGroup(Group):
         if not _skip_validation:
             valid, message = _check_cayley_group(cayley)
             if not valid:
-                raise ValueError(message)
+                raise ValueError(__errorcolor__+message)
 
         if elements is None:
             elements = list(range(len(cayley)))
@@ -271,6 +271,7 @@ class CayleyGroup(Group):
 
         self.cayley = cayley
         self.elements = elements
+        self._dict = {elements[k]: k for k in range(len(elements))}
 
     #–> DUNDERS 
 
@@ -310,29 +311,33 @@ class CayleyGroup(Group):
     #–> GROUP METHODS 
 
     def operation(self, a, b):
-        return self.cayley[a][b]
+        if a not in self.elements:
+            raise ValueError(__errorcolor__+f"The value {a} is not an element of the group")
+        if b not in self.elements:
+            raise ValueError(__errorcolor__+f"The value {b} is not an element of the group")
+        return self.elements[self.cayley[self._dict[a]][self._dict[b]]]
 
     def identity(self):
-            neutro = None
-            for e in range(self.order()):
-                ok = True
-                for a in range(self.order()):
-                    if self.cayley[e][a] != a:
-                        ok = False
-                        break
-                    if self.cayley[a][e] != a:
-                        ok = False
-                        break
-                if ok:
-                    neutro = e
+        neutro = None
+        for e in self.elements:
+            ok = True
+            for a in self.elements:
+                if self.operation(e,a) != a:
+                    ok = False
                     break
-            return neutro
+                if self.operation(e,a) != a:
+                    ok = False
+                    break
+            if ok:
+                neutro = e
+                break
+        return neutro
 
     def inverse(self, a):
         e = self.identity()
         inv = None
-        for i in range(len(self.cayley)):
-            if self.cayley[a][i]==e:
+        for i in self.elements:
+            if self.operation(a,i)==e:
                 inv = i
                 break
         return inv
@@ -466,8 +471,7 @@ class CayleyGroup(Group):
 
     def subgroups(self):
         # 1. Subgrupo trivial {e}
-        e_name = self.elements[self.identity()]
-        trivial_grp = CayleyGroup([[0]], [e_name])
+        trivial_grp = CayleyGroup([[0]], [self.identity()])
         trivial_subgroup = CayleySubgroup(trivial_grp, self)
 
         # 2. Subgrupos propios
@@ -789,13 +793,7 @@ class Element:
     def __mul__(self, other):
         if self.group != other.group:
             raise ValueError(__errorcolor__+"Elements belong to different groups.")
-
-        if self.index is not None and other.index is not None:
-            res_idx = self.group.operation(self.index, other.index)
-            return Element(self.group.elements[res_idx], self.group)
-        
-        res_elem = self.group.operation(self.element, other.element)
-        return Element(res_elem, self.group)
+        return Element(self.group.operation(self.element, other.element), self.group)
 
     def __pow__(self, k: int):
         if not isinstance(k, int):
