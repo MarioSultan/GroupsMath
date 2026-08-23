@@ -1,11 +1,11 @@
-# ———————————————————————————————————————————————————————————— #
-#                                                              #
-#                         GroupsMath                           #
-#           A Python library for finite group theory           #
-#                                                              #
-#                   by: Mario Sultan Romero                    #
-#                                                              #
-# ———————————————————————————————————————————————————————————— #
+# ————————————————————————————————————————————————————————————— #
+#                                                               #
+#                          GroupsMath                           #
+#        The educational Python library for Group Theory        #
+#                                                               #
+#                    by: Mario Sultan Romero                    #
+#                                                               #
+# ————————————————————————————————————————————————————————————— #
 
 
 #################### IMPORTS ####################
@@ -30,7 +30,7 @@ tgl = mcolors.LinearSegmentedColormap.from_list("tgl", ["white", tgl_color])
 rainbow = mcolors.LinearSegmentedColormap.from_list("rainbow", ["#FF0000","#FF9100","#F2DA00","#2CDB00","#00DAE9","#1869FF"])#,"#7648FF","#D12BFF"])
 rainbow8 = mcolors.LinearSegmentedColormap.from_list("rainbow8", ["#FF0000","#FF9100","#F2DA00","#2CDB00","#00DAE9","#1869FF","#7648FF","#FF1FF4"])
 
-def info():
+def groupsmath_info():
     print("———————————————————————————————————————————————————————————————————————————")
     print("                                                                           ")
     print("                          > GroupsMath v"+__version__+"                              ")
