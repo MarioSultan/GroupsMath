@@ -10,7 +10,9 @@
 ![GroupsMath Logo](https://raw.githubusercontent.com/MarioSultan/GroupsMath/main/logo.png)
 
 
-**GroupsMath** is a Python module for constructing, studying, and manipulating finite and infinite groups.
+GroupsMath is an educational and computational Python library for creating, exploring, and visualizing group structures, subgroups, Cayley tables, matrix groups, and many more group-theoretic properties.
+
+
 
 The project aims to provide a **simple** and **intuitive** interface for working with groups and their algebraic properties.
 
