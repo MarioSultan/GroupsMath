@@ -1,22 +1,24 @@
-# GroupsMath – v0.5.0
+# GroupsMath – v0.6.0
 
 [![PyPI Downloads](https://img.shields.io/pypi/dm/groupsmath)](https://pypistats.org/packages/groupsmath)
 [![PyPI Version](https://img.shields.io/pypi/v/groupsmath?color=2A646E)](https://pypi.org/project/groupsmath/)
 [![Python Versions](https://img.shields.io/pypi/pyversions/groupsmath?color=2A646E)](https://pypi.org/project/groupsmath/)
 ![Last Commit](https://img.shields.io/github/last-commit/MarioSultan/groupsmath?color=2A646E)
+![coverage](https://img.shields.io/badge/road%20to%20v1.0.0-85%25-yellowgreen?color=2A646E)
 <!-- ![GitHub Stars](https://img.shields.io/github/stars/MarioSultan/groupsmath?style=social) -->
 
 
 ![GroupsMath Logo](https://raw.githubusercontent.com/MarioSultan/GroupsMath/main/logo.png)
 
 
-GroupsMath is an educational and computational Python library for creating, exploring, and visualizing group structures, subgroups, Cayley tables, matrix groups, and many more group-theoretic properties.
-
-
+**GroupsMath** is a Python module for constructing, studying, and manipulating finite and infinite groups.
 
 The project aims to provide a **simple** and **intuitive** interface for working with groups and their algebraic properties.
 
 ![Examples](https://raw.githubusercontent.com/MarioSultan/GroupsMath/main/imgs/examples.png)
+
+> **⚠️ Notice:** Version v1.0.0 is nearing its official release.
+
 
 ---
 
@@ -89,7 +91,8 @@ GroupsMath is designed to provide tools for working with finite (and infinite) g
 * Determination of the order of a group and its elements.
 * Operation with group elements (multiplication, inverse, powers, ...)
 * Computation of Cayley tables with `matplotlib.pyplot`.
-* Detection of algebraic properties such as cyclicity and commutativity.
+* Detection of algebraic properties such as cyclicity, commutativity and solubility.
+* Centralizers, conjugacy classes and conmutator.
 * Computation and exploration of other structural properties of finite groups.
 * Predefined group families in the library `groupsmath.precooked`, such as $C_n$, $S_n$, $A_n$, $D_n$, $V_4$, $Q_8$, ...
 
@@ -97,6 +100,8 @@ GroupsMath is designed to provide tools for working with finite (and infinite) g
 * Study of subgroups (order, cosets, normal subgroups, quotients, ...).
 * Normal subgroups.
 * Quotient groups $Q=G/H$.
+* Conmutator and derived subgroups $G'$.
+* Abelianization $G/G'$
 
 **AUTOMORPHISMS:**
 * Class `Automorphism` and automorphism functions.
@@ -124,6 +129,7 @@ The GroupsMath team is currently working on theese ideas:
 * Optimization of actual features.
 * Representation theory.
 * and much more...
+
 
 ---
 
