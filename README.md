@@ -95,6 +95,7 @@ GroupsMath is designed to provide tools for working with finite (and infinite) g
 * Centralizers, conjugacy classes and conmutator.
 * Computation and exploration of other structural properties of finite groups.
 * Predefined group families in the library `groupsmath.precooked`, such as $C_n$, $S_n$, $A_n$, $D_n$, $V_4$, $Q_8$, ...
+* Isomorphisms between groups. 
 
 **SUBGROUPS:**
 * Study of subgroups (order, cosets, normal subgroups, quotients, ...).
