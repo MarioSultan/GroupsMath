@@ -21,7 +21,7 @@ from    math                import  gcd
 
 #################### DEFINITIONS ####################
 
-__version__ = "0.5.0"
+__version__ = "0.6.0"
 __errorcolor__ = "\033[31m"
 
 tgl_color = "#2A646E"
@@ -50,7 +50,7 @@ def groupsmath_info():
     print("———————————————————————————————————————————————————————————————————————————")
 
 
-#################### GROUP CLASS ####################
+#################### CLASSES ####################
 
 class Group(ABC):
     @classmethod
@@ -242,6 +242,95 @@ class ExplicitGroup(Group):
         if subgroup.group is not self:
             raise ValueError(__errorcolor__+"The subgroup does not belong to this group")
         return subgroup.quotient()
+
+    def centralizer(self, element):
+        if element not in self.elements:
+            raise ValueError(__errorcolor__ + f"Element '{element}' is not in group")
+        
+        cent = [g for g in self.elements if self.function(g, element) == self.function(element, g)]
+        sub_grp = ExplicitGroup(cent, self.function, _skip_validation=True)
+        return ExplicitSubgroup(sub_grp, self)
+
+    def conjugacy_class(self, element):
+        if element not in self.elements:
+            raise ValueError(__errorcolor__ + f"Element '{element}' is not in group")
+        
+        c_class = set()
+        for g in self.elements:
+            g_inv = self.inverse(g)
+            # g * element * g^-1
+            conj = self.function(self.function(g, element), g_inv)
+            c_class.add(conj)
+        return list(c_class)
+
+    def conjugacy_classes(self):
+        classes = []
+        visited = set()
+        for e in self.elements:
+            if e not in visited:
+                c = self.conjugacy_class(e)
+                classes.append(c)
+                visited.update(c)
+        return classes
+
+    def commutator(self, a, b):
+        if a not in self.elements or b not in self.elements:
+            raise ValueError(__errorcolor__ + "Elements must belong to group")
+        a_inv = self.inverse(a)
+        b_inv = self.inverse(b)
+        return self.function(self.function(self.function(a, b), a_inv), b_inv)
+
+    def commutator_subgroup(self):
+        generators = set()
+        for a in self.elements:
+            for b in self.elements:
+                generators.add(self.commutator(a, b))
+        
+        # Clausura del conjunto de conmutadores
+        elements = list(generators)
+        changed = True
+        while changed:
+            changed = False
+            for x in list(elements):
+                for y in list(elements):
+                    prod = self.function(x, y)
+                    if prod not in elements:
+                        elements.append(prod)
+                        changed = True
+                        
+        sub_grp = ExplicitGroup(elements, self.function, _skip_validation=True)
+        return ExplicitSubgroup(sub_grp, self)
+
+    def derived_subgroup(self, n=1):
+        if n < 0:
+            raise ValueError(__errorcolor__ + "n must be a non-negative integer")
+        if n == 0:
+            return ExplicitSubgroup(self, self)
+        
+        current = self.commutator_subgroup()
+        for _ in range(n - 1):
+            current = current.commutator_subgroup()
+        return current
+
+    def derived_series(self):
+        series = [ExplicitSubgroup(self, self)]
+        current = self.commutator_subgroup()
+        series.append(current)
+        
+        while True:
+            next_sub = current.commutator_subgroup()
+            if len(next_sub) == len(current):
+                break
+            series.append(next_sub)
+            current = next_sub
+            
+        return series
+
+    def abelianization(self):
+        return self.quotient(self.commutator_subgroup())
+
+    def is_solvable(self):
+        return len(self.derived_series()[-1]) == 1
     
     #–> AUTOMORPHISMS 
 
@@ -253,6 +342,29 @@ class ExplicitGroup(Group):
     
     def automorphism_group(self):           # REVISAR (Aunque seguramente se quede así)
         return self.toCayleyGroup().automorphism_group().toExplicitGroup()
+
+    #–> GENERATORS 
+
+    def generators(self):
+        """Devuelve un conjunto de generadores que genera todo el grupo."""
+        cayley_grp = self.toCayleyGroup()
+        gen_indices = cayley_grp.generators()
+        return [self.elements[i] for i in gen_indices]
+
+    def generates(self, subset):
+        """Comprueba si un subconjunto de elementos genera el grupo."""
+        if not all(e in self.elements for e in subset):
+            raise ValueError(__errorcolor__ + "All elements in subset must belong to the group.")
+            
+        cayley_grp = self.toCayleyGroup()
+        subset_indices = [self.elements.index(e) for e in subset]
+        sub_indices = _subgroup_generated_by(cayley_grp.cayley, subset_indices)
+        return len(sub_indices) == len(self)
+
+    #-> ISOMORPHISMS
+
+    def is_isomorphic_to(self, target):
+        return self.toCayleyGroup().is_isomorphic_to(target)
 
 class CayleyGroup(Group):
 
@@ -497,6 +609,103 @@ class CayleyGroup(Group):
             raise ValueError(__errorcolor__+"The subgroup does not belong to this group")
         return subgroup.quotient()
 
+    def centralizer(self, element):
+        if element not in self.elements:
+            raise ValueError(__errorcolor__ + f"Element '{element}' is not in group")
+        
+        a_idx = self._dict[element]
+        cent_indices = [g_idx for g_idx in range(self.order()) if self.cayley[g_idx][a_idx] == self.cayley[a_idx][g_idx]]
+        
+        sub_names = [self.elements[i] for i in cent_indices]
+        sub_matrix = _reset_renaming(_subset(self.cayley, cent_indices))
+        sub_grp = CayleyGroup(sub_matrix, sub_names, _skip_validation=True)
+        return CayleySubgroup(sub_grp, self)
+
+    def conjugacy_class(self, element):
+        if element not in self.elements:
+            raise ValueError(__errorcolor__ + f"Element '{element}' is not in group")
+        
+        a_idx = self._dict[element]
+        c_class_indices = set()
+        for g_idx in range(self.order()):
+            g_inv_idx = self.cayley[g_idx].index(self._dict[self.identity()])
+            conj_idx = self.cayley[self.cayley[g_idx][a_idx]][g_inv_idx]
+            c_class_indices.add(conj_idx)
+        return [self.elements[i] for i in c_class_indices]
+
+    def conjugacy_classes(self):
+        classes = []
+        visited = set()
+        for e in self.elements:
+            if e not in visited:
+                c = self.conjugacy_class(e)
+                classes.append(c)
+                visited.update(c)
+        return classes
+
+    def commutator(self, a, b):
+        return self.operation(self.operation(self.operation(a,b),self.inverse(a)),self.inverse(b))
+
+    def commutator_subgroup(self):
+        e_idx = self._dict[self.identity()]
+        gen_indices = set()
+        for a in range(self.order()):
+            for b in range(self.order()):
+                a_inv = self.cayley[a].index(e_idx)
+                b_inv = self.cayley[b].index(e_idx)
+                comm = self.cayley[self.cayley[self.cayley[a][b]][a_inv]][b_inv]
+                gen_indices.add(comm)
+                
+        # Clausura
+        indices = list(gen_indices)
+        changed = True
+        while changed:
+            changed = False
+            for x in list(indices):
+                for y in list(indices):
+                    prod = self.cayley[x][y]
+                    if prod not in indices:
+                        indices.append(prod)
+                        changed = True
+                        
+        sub_names = [self.elements[i] for i in indices]
+        sub_matrix = _reset_renaming(_subset(self.cayley, indices))
+        sub_grp = CayleyGroup(sub_matrix, sub_names, _skip_validation=True)
+        return CayleySubgroup(sub_grp, self)
+
+    def derived_subgroup(self, n=1):
+        if n < 0:
+            raise ValueError(__errorcolor__ + "n must be a non-negative integer")
+        if n == 0:
+            total_grp = CayleyGroup(self.cayley, self.elements)
+            return CayleySubgroup(total_grp, self)
+        
+        current = self.commutator_subgroup()
+        for _ in range(n - 1):
+            current = current.commutator_subgroup()
+        return current
+
+    def derived_series(self):
+        total_grp = CayleyGroup(self.cayley, self.elements)
+        series = [CayleySubgroup(total_grp, self)]
+        current = self.commutator_subgroup()
+        series.append(current)
+        
+        while True:
+            next_sub = current.commutator_subgroup()
+            if len(next_sub) == len(current):
+                break
+            series.append(next_sub)
+            current = next_sub
+            
+        return series
+
+    def abelianization(self):
+        return self.quotient(self.commutator_subgroup())
+
+    def is_solvable(self):
+        return len(self.derived_series()[-1]) == 1
+
     #–> AUTOMORPHISMS 
 
     def is_automorphism(self, phi):
@@ -555,6 +764,133 @@ class CayleyGroup(Group):
 
         names_aut = [str(auts[i]) for i in range(n)]
         return CayleyGroup(cayley_aut, names_aut, _skip_validation=True)
+
+    #–> GENERATORS 
+
+    def generators(self):
+        """Devuelve una lista con los elementos de un conjunto generador minimal."""
+        e_idx = self.identity()
+        current_subgroup = {e_idx}
+        generators_indices = []
+        
+        while len(current_subgroup) < self.order():
+            # Buscar el elemento fuera del subgrupo actual que maximice la clausura
+            best_candidate = None
+            best_closure = current_subgroup
+            
+            for candidate in range(self.order()):
+                if candidate not in current_subgroup:
+                    test_gens = generators_indices + [candidate]
+                    closure = set(_subgroup_generated_by(self.cayley, test_gens))
+                    
+                    if len(closure) > len(best_closure):
+                        best_closure = closure
+                        best_candidate = candidate
+                        
+                    # Si ya alcanzamos todo el grupo, terminamos temprano
+                    if len(closure) == self.order():
+                        generators_indices.append(candidate)
+                        return [self.elements[i] for i in generators_indices]
+                        
+            generators_indices.append(best_candidate)
+            current_subgroup = best_closure
+            
+        return [self.elements[i] for i in generators_indices]
+
+    def generates(self, subset):
+        """Comprueba si un subconjunto de elementos genera el grupo."""
+        if not all(e in self.elements for e in subset):
+            raise ValueError(__errorcolor__ + "All elements in subset must belong to the group.")
+            
+        subset_indices = [self._dict[e] for e in subset]
+        sub_indices = _subgroup_generated_by(self.cayley, subset_indices)
+        return len(sub_indices) == self.order()
+
+    #-> ISOMORPHISMS
+
+    def is_isomorphic_to(self, target):         #Revisar, pues es demasiado grande y algo puede salir mal
+        """Comprueba si el grupo actual es isomorfo al grupo 'target'."""
+        # Convertir a CayleyGroup si se pasa un ExplicitGroup
+        if hasattr(target, "toCayleyGroup"):
+            H = target.toCayleyGroup()
+        else:
+            H = target
+
+        G = self
+
+        # --- FASE 1: Filtros de Invariantes Algebraicos ---
+        if G.order() != H.order():
+            return False
+            
+        if G.is_abelian() != H.is_abelian():
+            return False
+            
+        if G.order_distribution() != H.order_distribution():
+            return False
+            
+        if len(G.center()) != len(H.center()):
+            return False
+
+        # --- FASE 2: Búsqueda de Isomorfismo vía Generadores ---
+        n = G.order()
+        
+        # 1. Obtener generadores del grupo G (por índices)
+        e_idx_G = self._dict[G.identity()]
+        gens_G = G.generators()
+        gens_G_idx = [G._dict[g] for g in gens_G]
+
+        # 2. Candidatos en H para cada generador de G (deben tener el mismo orden)
+        orders_G = G.element_orders()
+        orders_H = H.element_orders()
+        
+        candidates_per_gen = []
+        for g_idx in gens_G_idx:
+            g_order = orders_G[g_idx]
+            candidates = [h_idx for h_idx, o in enumerate(orders_H) if o == g_order]
+            candidates_per_gen.append(candidates)
+
+        # 3. Probar asignaciones de generadores
+        for tuple_h_indices in product(*candidates_per_gen):
+            # Mapear generadores de G -> H
+            mapping = {e_idx_G: H._dict[H.identity()]}
+            queue = [e_idx_G]
+            
+            # Extender el mapeo a todo el grupo a través de la multiplicación por generadores
+            valid_extension = True
+            
+            while queue and valid_extension:
+                curr = queue.pop(0)
+                for i, g_idx in enumerate(gens_G_idx):
+                    h_gen = tuple_h_indices[i]
+                    
+                    # Multiplicación curr * g en G
+                    next_g = G.cayley[curr][g_idx]
+                    expected_h = H.cayley[mapping[curr]][h_gen]
+                    
+                    if next_g in mapping:
+                        if mapping[next_g] != expected_h:
+                            valid_extension = False
+                            break
+                    else:
+                        mapping[next_g] = expected_h
+                        queue.append(next_g)
+                        
+            # Comprobar si el mapeo generado es una biyección inyectiva sobre H y preserva toda la Cayley
+            if valid_extension and len(mapping) == n and len(set(mapping.values())) == n:
+                # Validación final de la preservación de la operación para todo (a, b)
+                is_iso = True
+                for a in range(n):
+                    for b in range(n):
+                        if mapping[G.cayley[a][b]] != H.cayley[mapping[a]][mapping[b]]:
+                            is_iso = False
+                            break
+                    if not is_iso:
+                        break
+                        
+                if is_iso:
+                    return True
+
+        return False
 
 class Subgroup(ABC):
     pass
@@ -1126,6 +1462,30 @@ def _operate_cosets(G,C,A,B):
             break
     return r
 
+def _subgroup_generated_by(cayley, generators_indices):
+
+    generated = set(generators_indices)
+    queue = list(generators_indices)
+    
+    while queue:
+
+        current = queue.pop(0)
+
+        for g in generators_indices:
+
+            prod1 = cayley[current][g]
+            prod2 = cayley[g][current]
+            
+            if prod1 not in generated:
+                generated.add(prod1)
+                queue.append(prod1)
+
+            if prod2 not in generated:
+                generated.add(prod2)
+                queue.append(prod2)
+                
+    return sorted(list(generated))
+
 def _order_preserving_permutations(orders):
 
     classes = {}
@@ -1168,12 +1528,17 @@ def direct_product(A:CayleyGroup,B:CayleyGroup):
     return CayleyGroup(G,names,_skip_validation=True)
 
 def direct_power(G:CayleyGroup,n):
-    if n<2:
-        raise ValueError("n must be at least 2")
-    H = G
-    for i in range(n-1):
-        H = direct_product(H,G)
-    return H
+    if n==2:
+        return CayleyGroup([[0]],"e")
+    elif n==1:
+        return G
+    elif n>2:
+        H = G
+        for i in range(n-1):
+            H = direct_product(H,G)
+        return H
+    else:
+        raise ValueError(__errorcolor__+"n must be a possitive integer.")
 
 def semidirect_product(A: CayleyGroup, B: CayleyGroup, f: AutomorphismFunction):
     G = []
@@ -1199,6 +1564,15 @@ def semidirect_product(A: CayleyGroup, B: CayleyGroup, f: AutomorphismFunction):
             names.append(str(A.elements[a]) + "," + str(B.elements[b]))
 
     return CayleyGroup(G, names, _skip_validation=True)
+
+
+#################### ISOMORPHISMS ####################
+
+def are_isomorphic(G: Group, H: Group) -> bool:
+    """Devuelve True si los grupos G y H son isomorfos, False en caso contrario."""
+    if not isinstance(G, Group) or not isinstance(H, Group):
+        raise TypeError(__errorcolor__ + "Both arguments must be instances of Group")
+    return G.is_isomorphic_to(H)
 
 
 #################### GENERATORS ####################
