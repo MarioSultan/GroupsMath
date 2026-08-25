@@ -1,0 +1,677 @@
+# Conjugation and Commutators
+
+In **GroupsMath**, conjugation is used to study the internal structure of non-abelian groups. The library provides methods for centralizers, conjugacy classes, commutators, the commutator subgroup, derived subgroups, the derived series, abelianization, and solvability.
+
+These constructions are closely related: centralizers describe which elements commute with a given element, conjugacy classes describe how elements change under conjugation, and commutators measure the failure of elements to commute.
+
+---
+
+## Conjugation
+
+Let $G$ be a group and let $a,g\in G$. The conjugate of $a$ by $g$ is
+
+$$
+gag^{-1}.
+$$
+
+Two elements $a,b\in G$ are conjugate if there exists $g\in G$ such that
+
+$$
+b=gag^{-1}.
+$$
+
+In an abelian group,
+
+$$
+gag^{-1}=a
+$$
+
+for every $a,g\in G$, so every conjugacy class contains exactly one element.
+
+---
+
+## Conjugacy classes
+
+The conjugacy class of $a\in G$ is
+
+$$
+\text{Cl}_G(a)
+=
+\{gag^{-1}\mid g\in G\}.
+$$
+
+In GroupsMath, it is obtained with:
+
+```python
+G.conjugacy_class(element)
+```
+
+For example:
+
+```python
+from groupsmath.precooked import S3
+
+C = S3.conjugacy_class("(12)")
+print(C)
+```
+
+The element must belong to `G.elements`.
+
+The method computes $gag^{-1}$ for every $g\in G$ and removes duplicates.
+
+---
+
+## All conjugacy classes
+
+All conjugacy classes can be obtained with:
+
+```python
+G.conjugacy_classes()
+```
+
+For example:
+
+```python
+classes = S3.conjugacy_classes()
+
+for C in classes:
+    print(C)
+```
+
+The result is a partition of the group:
+
+$$
+G=\bigsqcup_i\text{Cl}_G(a_i).
+$$
+
+Each element occurs in exactly one of the returned classes.
+
+For $S_3$, the classes are:
+
+$$
+\{e\},
+$$
+
+$$
+\{(1\,2),(1\,3),(2\,3)\},
+$$
+
+and
+
+$$
+\{(1\,2\,3),(1\,3\,2)\}.
+$$
+
+Their sizes are $1$, $3$, and $2$, respectively.
+
+---
+
+# Centralizers
+
+The centralizer of $a\in G$ is
+
+$$
+C_G(a)
+=
+\{g\in G\mid ga=ag\}.
+$$
+
+It is the subgroup consisting of all elements that commute with $a$.
+
+GroupsMath computes it using:
+
+```python
+G.centralizer(element)
+```
+
+For example:
+
+```python
+C = S3.centralizer("(1 2)")
+
+print(C)
+print(C.order())
+```
+
+The result is a `CayleySubgroup`, so ordinary subgroup methods can be used on it:
+
+```python
+C.is_abelian()
+C.subgroups()
+C.cayley_table()
+```
+
+---
+
+## How the centralizer is computed
+
+GroupsMath checks every $g\in G$ and keeps precisely those satisfying:
+
+$$
+ga=ag.
+$$
+
+In a Cayley table this is equivalent to comparing:
+
+$$
+G[g,a]=G[a,g].
+$$
+
+The selected elements are then converted into a `CayleySubgroup` of the original group.
+
+---
+
+## The center
+
+The center of a group is
+
+$$
+Z(G)
+=
+\{g\in G\mid gx=xg\text{ for every }x\in G\}.
+$$
+
+Equivalently,
+
+$$
+Z(G)=\bigcap_{a\in G}C_G(a).
+$$
+
+GroupsMath provides the center directly through:
+
+```python
+G.center()
+```
+
+For an abelian group:
+
+$$
+Z(G)=G.
+$$
+
+For a group with trivial center:
+
+$$
+Z(G)=\{e\}.
+$$
+
+---
+
+# The class equation
+
+Centralizers and conjugacy classes satisfy the fundamental relation
+
+$$
+|\operatorname{Cl}_G(a)|
+=
+[G:C_G(a)]
+=
+\frac{|G|}{|C_G(a)|}.
+$$
+
+For example, in $S_3$, a transposition has a centralizer of order $2$, so:
+
+$$
+|\operatorname{Cl}_{S_3}((1\,2))|
+=
+\frac{6}{2}
+=
+3.
+$$
+
+A $3$-cycle has a centralizer of order $3$, giving:
+
+$$
+\frac{6}{3}=2.
+$$
+
+---
+
+# Commutators
+
+GroupsMath defines the commutator of $a,b\in G$ as
+
+$$
+[a,b]=aba^{-1}b^{-1}.
+$$
+
+It measures the failure of $a$ and $b$ to commute.
+
+If
+
+$$
+[a,b]=e,
+$$
+
+then:
+
+$$
+ab=ba.
+$$
+
+Thus, a group is abelian exactly when every commutator is the identity.
+
+---
+
+## Computing a commutator
+
+Use:
+
+```python
+G.commutator(a, b)
+```
+
+For example:
+
+```python
+comm = S3.commutator("(1 2)", "(2 3)")
+print(comm)
+```
+
+Both elements must belong to the group.
+
+The implementation evaluates:
+
+```text
+a · b
+↓
+(a · b) · a⁻¹
+↓
+((a · b) · a⁻¹) · b⁻¹
+```
+
+---
+
+## Commutators and centralizers
+
+The two concepts are directly related:
+
+$$
+[a,g]=e
+\iff
+ag=ga.
+$$
+
+Therefore:
+
+$$
+C_G(a)
+=
+\{g\in G\mid[a,g]=e\}.
+$$
+
+The centralizer is precisely the set of elements whose commutator with $a$ is trivial.
+
+---
+
+# The commutator subgroup
+
+The commutator subgroup, or derived subgroup, is
+
+$$
+G'=[G,G]
+=
+\langle[a,b]\mid a,b\in G\rangle.
+$$
+
+GroupsMath computes it using:
+
+```python
+G.commutator_subgroup()
+```
+
+The returned object is a `CayleySubgroup`.
+
+For example:
+
+```python
+Gprime = S3.commutator_subgroup()
+
+print(Gprime)
+print(Gprime.order())
+```
+
+For $S_3$:
+
+$$
+[S_3,S_3]=A_3.
+$$
+
+Hence the commutator subgroup has order $3$.
+
+---
+
+## How the commutator subgroup is computed
+
+GroupsMath first computes all commutators:
+
+$$
+[a,b]
+\qquad
+(a,b)\in G\times G.
+$$
+
+These form a generating set. The implementation then repeatedly multiplies elements of the generated set until closure is reached.
+
+The final closed set is converted into a `CayleySubgroup`.
+
+Thus the method computes the subgroup **generated by** the commutators, not merely the set of individual commutators.
+
+---
+
+## Perfect groups
+
+A group is perfect if:
+
+$$
+G'=G.
+$$
+
+This can be checked computationally with:
+
+```python
+G.commutator_subgroup().order() == G.order()
+```
+
+For a perfect group, the abelianization is trivial.
+
+---
+
+# Derived subgroups
+
+The derived series is defined recursively by
+
+$$
+G^{(0)}=G,
+$$
+
+$$
+G^{(1)}=G',
+$$
+
+and
+
+$$
+G^{(n+1)}=[G^{(n)},G^{(n)}].
+$$
+
+GroupsMath provides:
+
+```python
+G.derived_subgroup(n)
+```
+
+For example:
+
+```python
+G.derived_subgroup(1)
+```
+
+returns $G'$, while:
+
+```python
+G.derived_subgroup(2)
+```
+
+returns:
+
+$$
+G^{(2)}=[G',G'].
+$$
+
+The special case:
+
+```python
+G.derived_subgroup(0)
+```
+
+returns the whole group.
+
+The argument `n` must be a non-negative integer.
+
+---
+
+# The derived series
+
+The complete derived series can be obtained with:
+
+```python
+G.derived_series()
+```
+
+It returns:
+
+$$
+G=G^{(0)}
+\trianglerighteq
+G^{(1)}
+\trianglerighteq
+G^{(2)}
+\trianglerighteq\cdots
+$$
+
+For example:
+
+```python
+series = S3.derived_series()
+
+for i, H in enumerate(series):
+    print(f"G^({i}):", H)
+```
+
+GroupsMath continues computing derived subgroups until two consecutive terms have the same order.
+
+---
+
+# Abelianization
+
+The abelianization of $G$ is
+
+$$
+G_{\mathrm{ab}}
+=
+G/[G,G].
+$$
+
+GroupsMath computes it with:
+
+```python
+G.abelianization()
+```
+
+For example:
+
+```python
+A = S3.abelianization()
+
+print(A.order())
+```
+
+Since:
+
+$$
+[S_3,S_3]=A_3,
+$$
+
+we have:
+
+$$
+S_3^{\mathrm{ab}}
+=
+S_3/A_3
+\cong C_2.
+$$
+
+Thus the abelianization of $S_3$ has order $2$.
+
+The abelianization is always abelian and is the largest abelian quotient of $G$.
+
+---
+
+# Solvable groups
+
+A group is solvable if its derived series eventually reaches the trivial subgroup:
+
+$$
+G^{(n)}=\{e\}
+$$
+
+for some finite $n$.
+
+GroupsMath provides:
+
+```python
+G.is_solvable()
+```
+
+The implementation checks whether the last subgroup of the derived series has order $1$.
+
+For example:
+
+```python
+S3.is_solvable()
+# True
+```
+
+because:
+
+$$
+S_3
+\trianglerighteq
+A_3
+\trianglerighteq
+\{e\}.
+$$
+
+Therefore $S_3$ is solvable but non-abelian.
+
+---
+
+# Conjugation, centralizers and commutators together
+
+These constructions are closely connected.
+
+### Conjugacy class
+
+$$
+\operatorname{Cl}_G(a)
+=
+\{gag^{-1}\mid g\in G\}.
+$$
+
+### Centralizer
+
+$$
+C_G(a)
+=
+\{g\in G\mid ga=ag\}.
+$$
+
+### Class-centralizer relation
+
+$$
+|\operatorname{Cl}_G(a)|
+=
+[G:C_G(a)].
+$$
+
+### Commutator
+
+$$
+[a,g]=aga^{-1}g^{-1}.
+$$
+
+### Centralizer through commutators
+
+$$
+g\in C_G(a)
+\iff
+[a,g]=e.
+$$
+
+### Commutator subgroup
+
+$$
+[G,G]
+=
+\langle[a,b]\mid a,b\in G\rangle.
+$$
+
+These methods therefore provide several computational perspectives on the non-abelian structure of a group.
+
+---
+
+# Complete example
+
+The following example studies the centralizer, conjugacy class, commutator subgroup, derived series, abelianization, and solvability of $S_3$:
+
+```python
+from groupsmath.precooked import S3
+
+# Centralizer
+C = S3.centralizer("(1 2)")
+
+print("Centralizer:")
+print(C)
+print("Order:", C.order())
+
+# Conjugacy class
+Cclass = S3.conjugacy_class("(1 2)")
+
+print("Conjugacy class:")
+print(Cclass)
+print("Size:", len(Cclass))
+
+# Class-centralizer relation
+print(
+    "Class size:",
+    len(Cclass),
+    " = ",
+    S3.order() // C.order()
+)
+
+# Commutator
+comm = S3.commutator("(1 2)", "(2 3)")
+print("Commutator:", comm)
+
+# Commutator subgroup
+Gprime = S3.commutator_subgroup()
+
+print("Derived subgroup:")
+print(Gprime)
+print("Order:", Gprime.order())
+
+# Derived series
+series = S3.derived_series()
+
+for i, H in enumerate(series):
+    print(f"G^({i}) has order {H.order()}")
+
+# Abelianization
+A = S3.abelianization()
+
+print("Abelianization order:", A.order())
+
+# Solvability
+print("Solvable:", S3.is_solvable())
+```
+
+For $S_3$:
+
+$$
+[S_3,S_3]=A_3,
+$$
+
+$$
+S_3/[S_3,S_3]\cong C_2,
+$$
+
+and
+
+$$
+S_3\trianglerighteq A_3\trianglerighteq\{e\}.
+$$
+
+Therefore $S_3$ is solvable but non-abelian.
+
+The methods `centralizer()`, `conjugacy_class()`, `conjugacy_classes()`, `commutator()`, `commutator_subgroup()`, `derived_subgroup()`, `derived_series()`, `abelianization()`, and `is_solvable()` provide a computational interface to these fundamental constructions of finite group theory.
