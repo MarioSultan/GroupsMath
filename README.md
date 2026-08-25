@@ -1,13 +1,20 @@
 # GroupsMath – v0.5.0
 
+[![PyPI Downloads](https://img.shields.io/pypi/dm/groupsmath)](https://pypistats.org/packages/groupsmath)
+[![PyPI Version](https://img.shields.io/pypi/v/groupsmath?color=2A646E)](https://pypi.org/project/groupsmath/)
+[![Python Versions](https://img.shields.io/pypi/pyversions/groupsmath?color=2A646E)](https://pypi.org/project/groupsmath/)
+![Last Commit](https://img.shields.io/github/last-commit/MarioSultan/groupsmath?color=2A646E)
+<!-- ![GitHub Stars](https://img.shields.io/github/stars/MarioSultan/groupsmath?style=social) -->
+
+
 ![GroupsMath Logo](https://raw.githubusercontent.com/MarioSultan/GroupsMath/main/logo.png)
 
 
 **GroupsMath** is a Python module for constructing, studying, and manipulating finite and infinite groups.
 
-The project aims to provide a simple and intuitive interface for working with finite groups and their algebraic properties.
+The project aims to provide a **simple** and **intuitive** interface for working with groups and their algebraic properties.
 
-> **Note:** GroupsMath is currently under active development. Its API is still evolving and may change before version `1.0.0`.
+![Examples](https://raw.githubusercontent.com/MarioSultan/GroupsMath/main/imgs/examples.png)
 
 ---
 
@@ -29,7 +36,7 @@ or visit https://github.com/MarioSultan/GroupsMath and download all the files.
 
 ---
 
-## Examples
+## Quick start
 
 ### A program in GroupsMath
 ```python
@@ -121,14 +128,6 @@ The GroupsMath team is currently working on theese ideas:
 ## Documentation
 
 Detailed documentation is available in the [`docs`](https://github.com/MarioSultan/GroupsMath/tree/main/docs) directory of GitHub and it is developed alongside the library.
-
----
-
-## Project status
-
-GroupsMath is currently under active development.
-
-The project has successfully transitioned to an object-oriented interface centered around the `Group` class. The legacy function-based interface is being removed for future versions. The API should therefore be considered unstable until the `1.0.0` release, and breaking changes may occur between development versions.
 
 ---
 
