@@ -1,5 +1,7 @@
 # GroupsMath
 
+![GroupsMath Logo](https://raw.githubusercontent.com/MarioSultan/GroupsMath/main/logo.png)
+
 **GroupsMath** is an educational Python library for constructing, studying, and manipulating groups.
 
 It is designed to provide an intuitive interface for exploring concepts from group theory computationally.
