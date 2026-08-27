@@ -1,36 +1,91 @@
 site_name: GroupsMath
 site_description: The educational Python library for Group Theory
-site_author: Mario Sultan
+site_author: Mario Sultan Romero
+site_url: https://groupsmath.readthedocs.io/
+
+repo_name: MarioSultan/GroupsMath
+repo_url: https://github.com/MarioSultan/GroupsMath
+edit_uri: edit/main/docs/
 
 theme:
   name: material
   language: en
 
+  # Put your existing logo at docs/assets/logo.png
+  logo: assets/logo.png
+  favicon: assets/logo.png
+
+  palette:
+    - media: "(prefers-color-scheme: light)"
+      scheme: default
+      primary: custom
+      accent: custom
+      toggle:
+        icon: material/weather-night
+        name: Switch to dark mode
+    - media: "(prefers-color-scheme: dark)"
+      scheme: slate
+      primary: custom
+      accent: custom
+      toggle:
+        icon: material/weather-sunny
+        name: Switch to light mode
+
+  font:
+    text: Inter
+    code: JetBrains Mono
+
+  features:
+    - navigation.instant
+    - navigation.tracking
+    - navigation.sections
+    - navigation.expand
+    - navigation.top
+    - navigation.path
+    - search.suggest
+    - search.highlight
+    - content.code.copy
+    - content.code.annotate
+
+  icon:
+    repo: fontawesome/brands/github
+
 nav:
   - Home: index.md
+
   - Basic group methods:
       - Groups: Groups.md
       - Group families and precooked groups: Group_families_and_precooked_groups.md
       - Group operations and properties: Group_operations_and_properties.md
       - Elements: Elements.md
       - Cayley table visualization: Cayley_table_visualization.md
+
   - Advanced group methods:
       - Subgroups: Subgroups.md
       - Automorphisms: Automorphisms.md
       - Products: Products.md
       - Conjugation and commutators: Conjugation_and_commutators.md
+      
   - Matrix groups:
       - Matrix groups: Matrix_groups.md
 
+extra_css:
+  - stylesheets/extra.css
 
 markdown_extensions:
-  - pymdownx.arithmatex:
-      generic: true
-  - pymdownx.highlight
-  - pymdownx.superfences
-  - pymdownx.inlinehilite
   - admonition
   - attr_list
+  - pymdownx.details
+  - pymdownx.highlight
+  - pymdownx.inlinehilite
+  - pymdownx.keys
+  - pymdownx.superfences
+  - pymdownx.tabbed:
+      alternate_style: true
+  - pymdownx.arithmatex:
+      generic: true
 
 extra_javascript:
   - https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js
+
+copyright: "© 2026 Mario Sultan · GroupsMath"
