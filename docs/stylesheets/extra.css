@@ -1,0 +1,292 @@
+/* ==========================================================================
+   GroupsMath — Material for MkDocs custom theme
+   Brand color: #2A646E
+   ========================================================================== */
+
+/* ---------- Brand palette ---------- */
+
+:root > * {
+  --md-primary-fg-color: #2A646E;
+  --md-primary-fg-color--light: #4F858D;
+  --md-primary-fg-color--dark: #1D4850;
+
+  --md-accent-fg-color: #2A646E;
+  --md-accent-fg-color--transparent: rgba(42, 100, 110, 0.12);
+
+  --gm-teal: #2A646E;
+  --gm-teal-light: #4F858D;
+  --gm-teal-dark: #1D4850;
+  --gm-paper: #FAFCFC;
+  --gm-ink: #172326;
+  --gm-grid: rgba(42, 100, 110, 0.055);
+  --gm-border: rgba(42, 100, 110, 0.20);
+}
+
+[data-md-color-scheme="slate"] {
+  --md-primary-fg-color: #2A646E;
+  --md-primary-fg-color--light: #6B9EA5;
+  --md-primary-fg-color--dark: #1D4850;
+
+  --md-accent-fg-color: #73AEB5;
+  --md-accent-fg-color--transparent: rgba(115, 174, 181, 0.13);
+
+  --gm-paper: #11191B;
+  --gm-ink: #E8F0F1;
+  --gm-grid: rgba(115, 174, 181, 0.055);
+  --gm-border: rgba(115, 174, 181, 0.20);
+}
+
+/* ---------- Typography ---------- */
+
+.md-typeset {
+  line-height: 1.72;
+}
+
+.md-typeset h1,
+.md-typeset h2,
+.md-typeset h3 {
+  font-weight: 650;
+  letter-spacing: -0.025em;
+}
+
+.md-typeset h1 {
+  border-bottom: 1px solid var(--gm-border);
+  padding-bottom: 0.45rem;
+}
+
+.md-typeset h2 {
+  margin-top: 2.2em;
+}
+
+/* Mathematical display */
+.MathJax_Display {
+  margin: 1.4em 0 !important;
+}
+
+/* ---------- Header: GroupsMath identity ---------- */
+
+.md-header {
+  background:
+    linear-gradient(
+      90deg,
+      var(--gm-teal-dark) 0%,
+      var(--gm-teal) 48%,
+      var(--gm-teal-light) 100%
+    );
+  box-shadow: 0 2px 12px rgba(0, 0, 0, 0.14);
+  position: relative;
+}
+
+.md-header::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  opacity: 0.13;
+  background-image:
+    linear-gradient(rgba(255,255,255,0.7) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(255,255,255,0.7) 1px, transparent 1px);
+  background-size: 18px 18px;
+  mask-image: linear-gradient(
+    90deg,
+    transparent,
+    black 18%,
+    black 82%,
+    transparent
+  );
+}
+
+.md-header__inner {
+  position: relative;
+  z-index: 1;
+}
+
+.md-header__title {
+  font-weight: 700;
+  letter-spacing: 0.015em;
+}
+
+/* ---------- Top navigation ---------- */
+
+.md-tabs {
+  background: var(--gm-teal-dark);
+}
+
+.md-tabs__link {
+  opacity: 0.82;
+  transition: opacity 160ms ease, background 160ms ease;
+}
+
+.md-tabs__link:hover,
+.md-tabs__link--active {
+  opacity: 1;
+}
+
+.md-tabs__item--active {
+  border-bottom: 2px solid #fff;
+}
+
+/* ---------- Sidebar ---------- */
+
+.md-nav__title {
+  font-weight: 700;
+  letter-spacing: 0.01em;
+}
+
+.md-nav__link {
+  border-radius: 5px;
+  margin: 2px 0;
+  transition: background 120ms ease, color 120ms ease;
+}
+
+.md-nav__link:hover {
+  background: var(--md-accent-fg-color--transparent);
+}
+
+.md-nav__link--active {
+  font-weight: 650;
+  background: var(--md-accent-fg-color--transparent);
+  box-shadow: inset 3px 0 0 var(--gm-teal);
+}
+
+/* ---------- Main content: subtle mathematical grid ---------- */
+
+.md-main {
+  background-color: var(--gm-paper);
+  background-image:
+    linear-gradient(var(--gm-grid) 1px, transparent 1px),
+    linear-gradient(90deg, var(--gm-grid) 1px, transparent 1px);
+  background-size: 28px 28px;
+}
+
+.md-content__inner {
+  background: color-mix(in srgb, var(--gm-paper) 94%, transparent);
+  border-radius: 10px;
+}
+
+.md-grid {
+  max-width: 1500px;
+}
+
+/* ---------- Links ---------- */
+
+.md-typeset a {
+  font-weight: 520;
+}
+
+.md-typeset a:hover {
+  text-decoration: underline;
+  text-underline-offset: 0.18em;
+}
+
+/* ---------- Code: computational identity ---------- */
+
+.highlight {
+  border-radius: 8px;
+  box-shadow: 0 5px 18px rgba(0, 0, 0, 0.055);
+}
+
+.md-typeset pre > code {
+  border: 1px solid var(--gm-border);
+  border-radius: 8px;
+}
+
+.md-clipboard {
+  color: var(--gm-teal);
+}
+
+.md-typeset code {
+  color: var(--gm-teal-dark);
+}
+
+[data-md-color-scheme="slate"] .md-typeset code {
+  color: #8FC1C7;
+}
+
+/* ---------- Tables: useful for group-theory data ---------- */
+
+.md-typeset table:not([class]) {
+  border: 1px solid var(--gm-border);
+  border-radius: 7px;
+  overflow: hidden;
+}
+
+.md-typeset table:not([class]) th {
+  background: var(--gm-teal);
+  color: #fff;
+  font-weight: 650;
+}
+
+.md-typeset table:not([class]) tr:hover {
+  background: var(--gm-grid);
+}
+
+/* ---------- Admonitions ---------- */
+
+.md-typeset .admonition,
+.md-typeset details {
+  border-radius: 7px;
+  box-shadow: none;
+}
+
+.md-typeset .admonition-title,
+.md-typeset summary {
+  font-weight: 650;
+}
+
+/* ---------- Search ---------- */
+
+.md-search__form {
+  border-radius: 7px;
+}
+
+/* ---------- Footer ---------- */
+
+.md-footer {
+  background: #172326;
+}
+
+.md-footer-meta {
+  background: #101719;
+}
+
+/* ---------- Buttons ---------- */
+
+.md-button {
+  border-radius: 6px;
+  font-weight: 650;
+  transition: transform 120ms ease, box-shadow 120ms ease;
+}
+
+.md-button:hover {
+  transform: translateY(-1px);
+  box-shadow: 0 5px 14px rgba(0, 0, 0, 0.12);
+}
+
+.md-button--primary {
+  background: var(--gm-teal);
+  border-color: var(--gm-teal);
+}
+
+/* ---------- Focus and selection ---------- */
+
+::selection {
+  background: rgba(42, 100, 110, 0.25);
+}
+
+:focus-visible {
+  outline: 2px solid var(--gm-teal-light);
+  outline-offset: 2px;
+}
+
+/* ---------- Small screens ---------- */
+
+@media screen and (max-width: 76.1875em) {
+  .md-main {
+    background-size: 24px 24px;
+  }
+
+  .md-typeset h1 {
+    font-size: 1.85rem;
+  }
+}
