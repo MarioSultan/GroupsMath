@@ -1,5 +1,5 @@
 site_name: GroupsMath
-site_description: An educational Python library for group theory
+site_description: The educational Python library for Group Theory
 site_author: Mario Sultan
 
 theme:
@@ -8,17 +8,20 @@ theme:
 
 nav:
   - Home: index.md
-  - Groups:
-      - Groups: 01-Groups.md
-      - Group families and precooked groups: 02-Group families and precooked groups.md
-      - Group operations and properties: 03-Group operations and properties.md
-      - Elements: 04-Elements.md
-      - Cayley table visualization: 05-Cayley table visualization.md
-  - Subgroups: 06-Subgroups.md
-  - Automorphisms: 07-Automorphisms.md
-  - Products: 08-Products.md
-  - Conjugation and commutators: 09-Conjugation and commutators.md
-  - Matrix groups: 10-Matrix groups.md
+  - Basic group methods:
+      - Groups: Groups.md
+      - Group families and precooked groups: Group_families_and_precooked_groups.md
+      - Group operations and properties: Group_operations_and_properties.md
+      - Elements: Elements.md
+      - Cayley table visualization: Cayley_table_visualization.md
+  - Advanced group methods:
+      - Subgroups: Subgroups.md
+      - Automorphisms: Automorphisms.md
+      - Products: Products.md
+      - Conjugation and commutators: Conjugation_and_commutators.md
+  - Matrix groups:
+      - Matrix groups: Matrix_groups.md
+
 
 markdown_extensions:
   - pymdownx.arithmatex:
