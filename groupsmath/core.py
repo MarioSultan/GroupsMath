@@ -126,7 +126,7 @@ class ExplicitGroup(Group):
                 if self.operation(e,a) != a:
                     ok = False
                     break
-                if self.operation(e,a) != a:
+                if self.operation(a,e) != a:
                     ok = False
                     break
             if ok:
@@ -437,7 +437,7 @@ class CayleyGroup(Group):
                 if self.operation(e,a) != a:
                     ok = False
                     break
-                if self.operation(e,a) != a:
+                if self.operation(a,e) != a:
                     ok = False
                     break
             if ok:
@@ -735,16 +735,47 @@ class CayleyGroup(Group):
         return True
 
     def automorphisms(self):
+        """Calcula automorfismos propagando asignaciones sobre los generadores del grupo."""
         n = self.order()
-        auts = []
-        orders = self.element_orders()[:]
-        for p in _order_preserving_permutations(orders):
-            try:
-                auts.append(Automorphism(p,self))
-            except:
-                pass
+        gens_idx = [self._dict[g] for g in self.generators()]
+        orders = self.element_orders()
+        
+        # Candidatos en el codominio que coinciden en orden con los generadores
+        candidates_per_gen = [
+            [h for h in range(n) if orders[h] == orders[g]] 
+            for g in gens_idx
+        ]
 
-        return auts
+        valid_auts = []
+        e_idx = self._dict[self.identity()]
+
+        for tuple_h in product(*candidates_per_gen):
+            mapping = {e_idx: e_idx}
+            queue = [e_idx]
+            valid = True
+
+            # BFS para extender la imagen a todo el grupo
+            while queue and valid:
+                curr = queue.pop(0)
+                for i, g in enumerate(gens_idx):
+                    h = tuple_h[i]
+                    next_g = self.cayley[curr][g]
+                    expected_h = self.cayley[mapping[curr]][h]
+
+                    if next_g in mapping:
+                        if mapping[next_g] != expected_h:
+                            valid = False
+                            break
+                    else:
+                        mapping[next_g] = expected_h
+                        queue.append(next_g)
+
+            # Si el mapeo cubrió todo el grupo y es inyectivo, es un automorfismo
+            if valid and len(mapping) == n and len(set(mapping.values())) == n:
+                phi = tuple(mapping[i] for i in range(n))
+                valid_auts.append(Automorphism(phi, self))
+
+        return valid_auts    
     
     def automorphism_group(self):
         auts = [i.phi for i in self.automorphisms()]
@@ -1193,7 +1224,7 @@ class AutomorphismFunction:
         return str(self.phi)
 
 
-#################### HIDDEN COMMANDS ####################
+#################### HIDDEN FUNCTIONS ####################
 
 def _obtener_nombre(var_obj):
     for nombre, valor in globals().items():
@@ -1528,11 +1559,11 @@ def direct_product(A:CayleyGroup,B:CayleyGroup):
     return CayleyGroup(G,names,_skip_validation=True)
 
 def direct_power(G:CayleyGroup,n):
-    if n==2:
+    if n==0:
         return CayleyGroup([[0]],"e")
     elif n==1:
         return G
-    elif n>2:
+    elif n>=2:
         H = G
         for i in range(n-1):
             H = direct_product(H,G)
