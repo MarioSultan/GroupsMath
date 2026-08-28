@@ -1,10 +1,10 @@
-# GroupsMath – v0.6.0
+# GroupsMath – v0.7.0
 
 [![PyPI Downloads](https://img.shields.io/pypi/dm/groupsmath)](https://pypistats.org/packages/groupsmath)
 [![PyPI Version](https://img.shields.io/pypi/v/groupsmath?color=2A646E)](https://pypi.org/project/groupsmath/)
 [![Python Versions](https://img.shields.io/pypi/pyversions/groupsmath?color=2A646E)](https://pypi.org/project/groupsmath/)
 ![Last Commit](https://img.shields.io/github/last-commit/MarioSultan/groupsmath?color=2A646E)
-![coverage](https://img.shields.io/badge/road%20to%20v1.0.0-85%25-yellowgreen?color=2A646E)
+![coverage](https://img.shields.io/badge/road%20to%20v1.0.0-90%25-yellowgreen?color=2A646E)
 <!-- ![GitHub Stars](https://img.shields.io/github/stars/MarioSultan/groupsmath?style=social) -->
 
 
@@ -17,7 +17,7 @@ The project aims to provide a **simple** and **intuitive** interface for working
 
 ![Examples](https://raw.githubusercontent.com/MarioSultan/GroupsMath/main/imgs/examples.png)
 
-Visit here the [GroupsMath official documentation](https://groupsmath.readthedocs.io/en/latest/)!
+> Visit here the [GroupsMath official documentation](https://groupsmath.readthedocs.io/en/latest/).
 
 > **⚠️ Notice:** Version v1.0.0 is nearing its official release.
 
@@ -97,7 +97,6 @@ GroupsMath is designed to provide tools for working with finite (and infinite) g
 * Centralizers, conjugacy classes and conmutator.
 * Computation and exploration of other structural properties of finite groups.
 * Predefined group families in the library `groupsmath.precooked`, such as $C_n$, $S_n$, $A_n$, $D_n$, $V_4$, $Q_8$, ...
-* Isomorphisms between groups. 
 
 **SUBGROUPS:**
 * Study of subgroups (order, cosets, normal subgroups, quotients, ...).
