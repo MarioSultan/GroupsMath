@@ -17,6 +17,8 @@ The project aims to provide a **simple** and **intuitive** interface for working
 
 ![Examples](https://raw.githubusercontent.com/MarioSultan/GroupsMath/main/imgs/examples.png)
 
+Visit here the [GroupsMath official documentation](https://groupsmath.readthedocs.io/en/latest/)!
+
 > **⚠️ Notice:** Version v1.0.0 is nearing its official release.
 
 
@@ -136,7 +138,7 @@ The GroupsMath team is currently working on theese ideas:
 
 ## Documentation
 
-Detailed documentation is available in the [`docs`](https://github.com/MarioSultan/GroupsMath/tree/main/docs) directory of GitHub and it is developed alongside the library.
+Detailed documentation is available in the [GroupsMath official documentation](https://groupsmath.readthedocs.io/en/latest/) and it is developed alongside the library.
 
 ---
 
