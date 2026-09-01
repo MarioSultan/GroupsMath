@@ -209,23 +209,37 @@ def SL(n, field="R", p=None):
         cond = lambda M: np.isclose(np.linalg.det(M), 1.0)
     return MatrixGroup(n, field=field, condition=cond, p=p)
 
-def O(n, field="R"):
+def O(n, field="R", p=None):
     """Orthogonal Group O_n(R)"""
-    if field=="F_p" or type(field)==int:
-        raise ValueError (__errorcolor__+"GroupsMath cannot generate an orthogonal group in a finite field.")
-    if n%2==0:
-        raise ValueError (__errorcolor__+"Cannot generate an orthogonal group without Witt index in even dimension.")
-    cond = lambda M: np.allclose(M.T @ M, np.eye(n))
-    return MatrixGroup(n, field=field, condition=cond)
 
-def SO(n, field="R"):
-    """Special Orthogonal Group SO_n(R)"""
-    if field=="F_p" or type(field)==int:
-            raise ValueError (__errorcolor__+"GroupsMath cannot generate an orthogonal group in a finite field.")
     if n%2==0:
         raise ValueError (__errorcolor__+"Cannot generate an orthogonal group without Witt index in even dimension.")
-    cond = lambda M: np.allclose(M.T @ M, np.eye(n)) and np.isclose(np.linalg.det(M), 1.0)
-    return MatrixGroup(n, field=field, condition=cond)
+
+    if type(field)==int:
+        p = field
+        field = "F_p"
+    if field == "F_p":
+        cond = lambda M: np.allclose(np.mod(M.T @ M,p), np.eye(n))
+    else:
+        cond = lambda M: np.allclose(M.T @ M, np.eye(n))
+
+    return MatrixGroup(n, field=field, condition=cond, p=p)
+
+def SO(n, field="R", p=None):
+    """Special Orthogonal Group SO_n(R)"""
+
+    if n%2==0:
+        raise ValueError (__errorcolor__+"Cannot generate an orthogonal group without Witt index in even dimension.")
+
+    if type(field)==int:
+        p = field
+        field = "F_p"
+    if field == "F_p":
+        cond = lambda M: np.allclose(np.mod(M.T @ M,p), np.eye(n)) and np.isclose(np.linalg.det(M)%p, 1.0)
+    else:
+        cond = lambda M: np.allclose(M.T @ M, np.eye(n)) and np.isclose(np.linalg.det(M), 1.0)
+    
+    return MatrixGroup(n, field=field, condition=cond, p=p)
 
 def U(n):
     """
@@ -243,11 +257,11 @@ def SU(n):
     cond = lambda M: np.allclose(M.conj().T @ M, np.eye(n)) and np.isclose(np.linalg.det(M), 1.0 + 0j)
     return MatrixGroup(n, field="C", condition=cond)
 
-def Sp(n):
+def Sp(n, field="R", p=None):
     """
-    Symplectic Group Sp(2n, R) over real matrices.
+    Symplectic Group Sp(n, R).
     Condition: M^T @ J @ M = J, where J = [[0, I], [-I, 0]].
-    Note: The matrix dimension must be even (2n).
+    Note: The matrix dimension must be even.
     """
     if n % 2 != 0:
         raise ValueError(__errorcolor__+"Symplectic group dimension must be an even integer.")
@@ -256,7 +270,15 @@ def Sp(n):
     I_k = np.eye(k)
     J = np.block([[np.zeros((k, k)), I_k], 
                   [-I_k, np.zeros((k, k))]])
+
+    if type(field)==int:
+        p = field
+        field = "F_p"
+    if field == "F_p":
+        Jp = np.mod(J,p)
+        cond = lambda M: np.allclose(np.mod(M.T @ J @ M,p), Jp)
+    else:
+        cond = lambda M: np.allclose(M.T @ J @ M, J)
     
-    cond = lambda M: np.allclose(M.T @ J @ M, J)
-    return MatrixGroup(n, field="R", condition=cond)
+    return MatrixGroup(n, field=field, condition=cond, p=p)
 
