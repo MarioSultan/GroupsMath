@@ -44,6 +44,16 @@ From there, you can construct groups, perform operations on their elements, inve
 ### Matrix groups
 
 - [Matrix groups](Matrix_groups.md)
+- [Finite fields](Finite_fields.md)
+
+### Presented groups
+- [Presentations (*experimental feature*)](Presentations.md)
+
+### Structure
+- [Structure description (*experimental feature*)](Structure.md)
+
+### Shortcuts
+- [Shortcuts](Shortcuts.md)
 
 ## Project
 
