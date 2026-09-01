@@ -2,153 +2,95 @@
 
 ![Experimental feature](https://raw.githubusercontent.com/MarioSultan/GroupsMath/main/expf.png)
 
-GroupMaker provides experimental support for groups defined by generators and relations through the `PresentedGroup` class.
+The `groupsmath.presentations` module provides a way to represent finitely presented groups using generators and relations.
 
-A group presentation has the form
+A presented group is written in the form
 
 $$
-G=\langle x_1,\ldots,x_n\mid r_1,\ldots,r_m\rangle,
+\langle x_1,x_2,\ldots \mid r_1,r_2,\ldots\rangle,
 $$
 
-where the $x_i$ are generators and the $r_i$ are relations that are required to represent the identity element.
+where the generators describe the symbols used to build group elements and the relations specify which words are identified with the identity.
 
-The presentation system works with words in generators and their inverses, reduces them freely, and then applies rewriting rules derived from the defining relations.
-
-```python
-from groupsmath.presentations import Word, PresentedGroup
-```
+The implementation represents elements as `Word` objects and reduces words using free cancellation and rewriting rules derived from the relations.
 
 ---
 
-## Words
+## `Word`
 
-Words are represented by the `Word` class.
-
-A word is created from a string:
+The basic object used by the presentation machinery is:
 
 ```python
-w = Word("abBA")
+Word(word)
 ```
 
-Each lowercase letter represents a generator and its corresponding uppercase letter represents its inverse:
+A `Word` is a sequence of generator symbols.
 
-```text
-a  -> a
-A  -> a⁻¹
-b  -> b
-B  -> b⁻¹
-```
-
-The empty word represents the identity element. It can be created using either:
+The empty word represents the identity:
 
 ```python
 Word("")
 ```
 
-or:
+and can also be written:
 
 ```python
 Word("e")
 ```
 
-Both represent:
+Both are displayed as:
 
-$$
-e.
-$$
-
-The string representation of the identity is:
-
-```python
-str(Word(""))
-# 'e'
+```text
+e
 ```
 
-The letter `e` is notation for the identity rather than a generator.
+### Alphabet
 
----
+Words use Latin letters to distinguish generators from their inverses:
 
-## Valid generators
-
-Generators must be single lowercase Latin letters.
+- lowercase letter = generator
+- uppercase letter = inverse generator
 
 For example:
 
-```python
-Word("a")
-Word("b")
-Word("x")
-```
-
-are valid words.
-
-A `PresentedGroup` therefore uses generator names such as:
-
-```python
-[a, b, c]
-```
-
-where each generator is represented by a `Word`.
-
-Generator names must be unique.
-
-For every generator, the corresponding uppercase letter is automatically assigned as its inverse. Thus:
-
 ```text
-a <-> A
-b <-> B
+a
+A
 ```
+
+represent `a` and `a⁻¹`.
+
+The `Word` class accepts Latin letters except `e`/`E`, because `e` is reserved for the identity.
 
 ---
 
 ## Multiplication of words
 
-Words can be multiplied using `*`.
-
-For example:
+Words can be concatenated using `*`:
 
 ```python
-a = Word("a")
-b = Word("b")
-
-w = a * b
+Word("ab") * Word("c")
 ```
 
 gives:
 
 ```text
-ab
+abc
 ```
 
-Multiplication corresponds to concatenation:
+The operation is concatenation; it does not by itself apply the presentation relations.
 
-$$
-ab\cdot cd=abcd.
-$$
-
-The order of the letters is preserved.
-
-Multiplication also accepts strings:
+Strings can also be used directly:
 
 ```python
-a * "b"
+Word("ab") * "c"
 ```
-
-and:
-
-```python
-"a" * b
-```
-
-are both supported.
 
 ---
 
-## Powers of words
+## Powers
 
-Words support integer powers using `**`.
-
-For a positive integer:
+Words support integer powers:
 
 ```python
 Word("a") ** 3
@@ -164,113 +106,64 @@ The zeroth power is the identity:
 
 ```python
 Word("a") ** 0
-# e
-```
-
-Negative powers use the inverse word:
-
-```python
-Word("a") ** -1
-# A
-```
-
-For example:
-
-```python
-Word("ab") ** -1
-```
-
-produces:
-
-```text
-BA
-```
-
-because
-
-$$
-(ab)^{-1}=b^{-1}a^{-1}.
-$$
-
----
-
-## Inverses of words
-
-The inverse of a word can be obtained with:
-
-```python
-w.inverse()
-```
-
-or with the `~` operator:
-
-```python
-~w
-```
-
-For example:
-
-```python
-w = Word("abC")
-w.inverse()
 ```
 
 gives:
 
 ```text
-cBA
+e
 ```
 
-The inverse reverses the word and replaces every generator by its inverse.
+Negative powers use the inverse:
 
-For
+```python
+Word("a") ** -1
+```
 
-$$
-w=x_1x_2\cdots x_n,
-$$
+gives:
 
-we have
-
-$$
-w^{-1}=x_n^{-1}\cdots x_2^{-1}x_1^{-1}.
-$$
+```text
+A
+```
 
 ---
 
-## Free reduction
+## Inverses
 
-Words are freely reduced before relations are applied.
+The inverse of a word is obtained by:
 
-A generator and its inverse cancel:
-
-$$
-xx^{-1}=e,
-\qquad
-x^{-1}x=e.
-$$
+1. reversing the word;
+2. replacing every generator by its inverse.
 
 For example:
 
 ```text
-aAbB -> e
-abBA -> e
+abC
 ```
 
-and:
+has inverse:
 
 ```text
-abBa -> aa
+cBA
 ```
 
-after the inverse pair `bB` is cancelled.
+The inverse can be obtained with:
 
-Free reduction is independent of the defining relations of the group.
+```python
+word.inverse()
+```
+
+or:
+
+```python
+~word
+```
+
+The identity is its own inverse.
 
 ---
 
-# Presented groups – ⚠️ under development
-
-## Creating a presentation
+# `PresentedGroup`
 
 A presented group is created with:
 
@@ -278,406 +171,470 @@ A presented group is created with:
 PresentedGroup(generators, relations)
 ```
 
-For example, the cyclic group of order $3$ can be presented as
-
-$$
-C_3=\langle a\mid a^3=e\rangle.
-$$
-
-In GroupMaker:
+For example:
 
 ```python
-a = Word("a")
-
-C3 = PresentedGroup(
-    [a],
-    [a**3]
+G = PresentedGroup(
+    ["a", "b"],
+    ["a3", "b2", "abAB"]
 )
 ```
 
-Every supplied relation is interpreted as being equal to the identity.
+corresponds to the presentation:
+
+$$
+\langle a,b\mid a^3,b^2,aba^{-1}b^{-1}\rangle.
+$$
+
+The relations are interpreted as words equal to the identity.
 
 ---
 
-## Multiple generators
+## Generators
 
-Presentations can contain several generators.
+Generators must be:
 
-For example,
+- single lowercase Latin letters;
+- distinct.
 
-$$
-G=\langle a,b\mid a^2,b^2,(ab)^3\rangle
-$$
-
-can be written as:
+For example:
 
 ```python
-a = Word("a")
-b = Word("b")
+["a", "b", "c"]
+```
 
-G = PresentedGroup(
-    [a, b],
-    [a**2, b**2, (a*b)**3]
-)
+is valid.
+
+But:
+
+```python
+["a", "A"]
+```
+
+is not valid, because generators must be lowercase.
+
+Likewise, generators cannot contain multiple characters.
+
+The class automatically constructs the inverse map:
+
+```text
+a ↔ A
+b ↔ B
+c ↔ C
 ```
 
 ---
 
 ## Relations
 
-Relations can be supplied as `Word` objects or as strings.
+Relations can be supplied as strings or `Word` objects:
+
+```python
+PresentedGroup(
+    ["a", "b"],
+    ["aaa", "bb", "abAB"]
+)
+```
+
+Each relation is interpreted as:
+
+$$
+r=e.
+$$
+
+Before being stored, the relation is freely reduced.
+
+Thus redundant free cancellations are removed immediately.
+
+---
+
+# Free reduction
+
+The method:
+
+```python
+_free_reduce(word)
+```
+
+performs the standard free-group cancellations:
+
+$$
+xx^{-1}\rightarrow e
+$$
+
+and
+
+$$
+x^{-1}x\rightarrow e.
+$$
 
 For example:
-
-```python
-G = PresentedGroup(
-    [Word("a")],
-    ["aaa"]
-)
-```
-
-is equivalent to:
-
-```python
-G = PresentedGroup(
-    [Word("a")],
-    [Word("aaa")]
-)
-```
-
-Relations are checked to ensure that they only contain generators belonging to the presentation and their inverses.
-
-For example, if the generators are `a` and `b`, then:
 
 ```text
-abBA
+aAbB
 ```
 
-is valid.
-
-A word containing an unrelated generator is rejected.
-
----
-
-## Stored relations
-
-Relations are freely reduced when the presentation is created.
-
-The resulting relations are stored in:
-
-```python
-G.relations
-```
-
-For example, inverse pairs contained in a relation are removed before the relation is stored.
-
----
-
-# Reducing words using relations
-
-## The reduction process
-
-For a presentation
-
-$$
-G=\langle X\mid R\rangle,
-$$
-
-GroupMaker attempts to obtain a shorter representative of a word using the defining relations.
-
-Reduction takes place in two stages:
-
-1. Free reduction.
-2. Reduction using rules derived from the defining relations.
-
-The relation-reduction process repeatedly applies rules while they produce a strictly shorter word.
-
----
-
-## Relation rewriting rules
-
-For every defining relation
-
-$$
-r=e,
-$$
-
-GroupMaker constructs rewriting rules.
-
-The relator and its inverse can be replaced by the identity:
-
-$$
-r\to e,
-\qquad
-r^{-1}\to e.
-$$
-
-Additional rules are derived by isolating each generator or inverse appearing in the relation.
-
-For example, from:
-
-$$
-aaa=e,
-$$
-
-the system can derive:
-
-$$
-A\to aa
-$$
-
-and the shorter normal-form rule:
-
-$$
-aa\to A.
-$$
-
-These rules are generated automatically by `_relation_rules()`.
-
----
-
-## Reducing a word
-
-The complete reduction is performed internally by `_reduce()`.
-
-For normal use, this private method should not need to be called directly. Public group operations automatically reduce their results.
-
-For example:
-
-```python
-G.operation("a", "aa")
-```
-
-concatenates the two words and reduces the result.
-
-Likewise:
-
-```python
-G.inverse("a")
-```
-
-calculates and reduces the inverse.
-
----
-
-# Group operations
-
-## The group operation
-
-`PresentedGroup` implements the group operation through:
-
-```python
-G.operation(elem1, elem2)
-```
-
-The arguments may be `Word` objects or strings.
-
-For example:
-
-```python
-a = Word("a")
-
-G = PresentedGroup(
-    [a],
-    [a**3]
-)
-
-G.operation("a", "aa")
-```
-
-The words are concatenated and then reduced using the defining relations.
-
-For
-
-$$
-\langle a\mid a^3\rangle,
-$$
-
-the result represents:
-
-$$
-a\cdot a^2=a^3=e.
-$$
-
----
-
-## Identity
-
-The identity element is returned by:
-
-```python
-G.identity()
-```
-
-For a `PresentedGroup`, this is:
-
-```python
-Word("e")
-```
-
----
-
-## Inverses
-
-The inverse of an element can be obtained with:
-
-```python
-G.inverse(element)
-```
-
-For example:
-
-```python
-G.inverse("a")
-```
-
-returns the reduced inverse word.
-
-For a generator `a`, the uppercase letter `A` represents $a^{-1}$.
-
-Relations may reduce this inverse further. For example, from
-
-$$
-a^3=e,
-$$
-
-we obtain
-
-$$
-a^{-1}=a^2.
-$$
-
----
-
-# Converting a presentation into a finite group
-
-## `toCayleyGroup()`
-
-A `PresentedGroup` does not initially store its elements as a Cayley table.
-
-Its elements are represented by reduced words.
-
-A finite group can be enumerated and converted into a `CayleyGroup` using:
-
-```python
-G.toCayleyGroup()
-```
-
-The conversion explores the group using breadth-first search (BFS).
-
-Starting from the identity, GroupMaker repeatedly multiplies each discovered element by every generator and every inverse generator.
-
----
-
-## Breadth-first exploration
-
-Suppose the generators are:
-
-```text
-a, b
-```
-
-The enumeration starts at:
+reduces to:
 
 ```text
 e
 ```
 
-and explores products with:
+and:
 
 ```text
-a, b, A, B
+abBa
 ```
 
-New reduced words are added to the enumeration as they are discovered.
-
-Each distinct reduced word receives an internal index.
-
-The resulting correspondence is conceptually:
+reduces to:
 
 ```text
-reduced word -> element index
+aa
 ```
 
-Once all elements have been discovered, GroupMaker constructs the Cayley table by evaluating the product of every pair of discovered words.
+The implementation performs this efficiently with a stack.
+
+Importantly, free reduction uses only inverse pairs. It does not use the defining relations of the presented group.
 
 ---
 
-## Generator and inverse exploration
+# Reduction using relations
 
-The enumeration uses both the generators and their inverses.
+After free reduction, the presentation can apply its defining relations.
 
-For generators:
+The main method is:
+
+```python
+_reduce(word)
+```
+
+It performs:
+
+1. free reduction;
+2. relation rewriting;
+3. free reduction again;
+4. repetition until no further reduction is possible.
+
+The goal is to replace a word with a shorter equivalent word.
+
+---
+
+## Relation rewriting rules
+
+For every relation
+
+$$
+x_1x_2\cdots x_n=e,
+$$
+
+the implementation creates rewriting rules.
+
+The original relator is converted to the identity:
+
+```text
+x1x2...xn -> e
+```
+
+and its inverse is also converted to the identity.
+
+The implementation additionally derives rules by isolating each generator.
+
+If:
+
+$$
+LxR=e,
+$$
+
+then:
+
+$$
+x^{-1}=RL.
+$$
+
+This gives a rewriting rule for the inverse of `x`.
+
+The implementation also derives the corresponding rule for `x` itself.
+
+---
+
+## Example: `aaa = e`
+
+Consider the relation:
+
+```text
+aaa
+```
+
+which means:
+
+$$
+a^3=e.
+$$
+
+The presentation can derive:
+
+$$
+a^{-1}=a^2.
+$$
+
+In the module's notation:
+
+```text
+A -> aa
+```
+
+It can also derive the reverse form:
+
+```text
+aa -> A
+```
+
+when that produces a shorter word.
+
+Thus a word containing `aa` may be reduced to `A`.
+
+---
+
+## Only shortening rules are applied
+
+`_relation_reduce_once()` searches for a rewriting rule and applies it only when the resulting word is shorter than the original.
+
+This is an important part of the current implementation.
+
+Therefore, a mathematically valid relation is not necessarily used in both directions if one direction would increase the word length.
+
+This gives the reduction procedure a practical stopping condition.
+
+---
+
+# Group operation
+
+The group operation of a `PresentedGroup` is:
+
+```python
+G.operation(elem1, elem2)
+```
+
+The two elements are converted into `Word` objects, concatenated, and reduced.
+
+Conceptually:
+
+$$
+[u]\cdot[v]=[uv].
+$$
+
+For example:
+
+```python
+G.operation("ab", "BA")
+```
+
+first forms:
+
+```text
+abBA
+```
+
+and then reduces it according to free cancellation and the presentation relations.
+
+The result is returned as a `Word`.
+
+---
+
+## Identity
+
+The identity element is:
+
+```python
+G.identity()
+```
+
+and is represented by:
+
+```text
+e
+```
+
+Internally this is an empty word.
+
+---
+
+## Inverse
+
+The inverse of a presented-group element is calculated by reversing and inverting the word and then reducing it:
+
+```python
+G.inverse("ab")
+```
+
+The result represents:
+
+$$
+(ab)^{-1}=b^{-1}a^{-1}.
+$$
+
+---
+
+# Membership
+
+`PresentedGroup` accepts a word if it uses only the group's generators and their inverses.
+
+For example, if the generators are:
 
 ```text
 a, b
 ```
 
-the exploration set is:
+then these are valid:
 
 ```text
-a, b, A, B
+a
+A
+ab
+aBbA
 ```
 
-This ensures that the search can move through the group in both directions.
+but a word containing an unrelated generator is rejected.
 
-The process starts from the identity and continues until the queue of undiscovered elements is empty.
+The membership test checks that the word can be converted and validated against the presentation's alphabet.
 
-If the process terminates, the complete finite group has been enumerated.
+> Membership here means that the expression is a valid word in the presentation's generators. It is not a test for whether two arbitrary words represent different group elements.
 
 ---
 
-## Maximum number of elements
+# Converting a presentation to a `CayleyGroup`
 
-By default, `toCayleyGroup()` allows at most:
-
-```python
-1000
-```
-
-discovered elements.
-
-This can be changed using `max_elements`:
-
-```python
-G.toCayleyGroup(max_elements=5000)
-```
-
-If the enumeration reaches the limit before the group is completely discovered, an `OverflowError` is raised.
-
-This is particularly important for infinite groups and very large finite groups.
-
-For example:
-
-```python
-G.toCayleyGroup(max_elements=100)
-```
-
-will stop if more than 100 elements are required.
-
----
-
-## Caching
-
-The Cayley representation is cached in the `_cayley_cache` attribute.
-
-Therefore, after:
-
-```python
-C = G.toCayleyGroup()
-```
-
-a subsequent call to:
+The most important transformation provided by the module is:
 
 ```python
 G.toCayleyGroup()
 ```
 
-can return the cached representation instead of enumerating the group again.
+This attempts to enumerate the presented group and construct its Cayley table.
+
+The enumeration is performed with **breadth-first search (BFS)**.
 
 ---
 
-## Order
+## BFS enumeration
+
+The search starts with the identity:
+
+```text
+e
+```
+
+and explores the group by multiplying known elements by every generator and every generator inverse.
+
+If the generators are:
+
+```text
+a, b
+```
+
+the search uses:
+
+```text
+a, b, A, B
+```
+
+as its generating set for the exploration.
+
+Every newly discovered reduced word is added to the queue.
+
+This continues until no new elements are found.
+
+Therefore, if the presented group is finite, BFS can eventually discover all its elements, assuming the maximum-element limit is not reached.
+
+---
+
+## `max_elements`
+
+The conversion accepts:
+
+```python
+G.toCayleyGroup(max_elements=1000)
+```
+
+The default limit is:
+
+```text
+1000
+```
+
+If the search discovers that the group contains at least that many elements before the enumeration finishes, an `OverflowError` is raised.
+
+This prevents an infinite or very large presented group from causing an unbounded enumeration.
+
+For a larger finite group, the limit can be increased:
+
+```python
+G.toCayleyGroup(max_elements=10000)
+```
+
+---
+
+## Cayley table construction
+
+After BFS has discovered all elements, the module creates an indexed list:
+
+```text
+0, 1, 2, ...
+```
+
+for the discovered words.
+
+It then computes every product:
+
+$$
+g_i g_j
+$$
+
+and stores the index of the resulting word in the Cayley table.
+
+The resulting object is a normal `CayleyGroup`.
+
+The names of its elements are the corresponding reduced words.
+
+---
+
+# Caching
+
+The first call to:
+
+```python
+G.toCayleyGroup()
+```
+
+performs the enumeration.
+
+The resulting `CayleyGroup` is stored in:
+
+```python
+G._cayley_cache
+```
+
+Subsequent calls return the cached object instead of enumerating the presentation again.
+
+This is especially useful because constructing the complete Cayley table can be expensive.
+
+---
+
+# `toExplicitGroup()`
+
+A presented group can also be converted directly to an `ExplicitGroup`:
+
+```python
+G.toExplicitGroup()
+```
+
+Internally, this first constructs the corresponding `CayleyGroup` and then converts it to an `ExplicitGroup`.
+
+Therefore the same enumeration limitations apply.
+
+---
+
+# `order()`
 
 The order of a `PresentedGroup` is obtained through its Cayley representation:
 
@@ -685,125 +642,165 @@ The order of a `PresentedGroup` is obtained through its Cayley representation:
 G.order()
 ```
 
-Internally, this is equivalent to obtaining the Cayley group and asking for its order.
+Conceptually:
 
-Consequently, the group must be completely enumerable within the selected element limit.
+1. enumerate the group;
+2. construct the Cayley group;
+3. count its elements.
 
----
+For a finite presented group this gives its order.
 
-# Converting to an explicit group
-
-A presented group can also be converted to an `ExplicitGroup`:
-
-```python
-G.toExplicitGroup()
-```
-
-This first obtains the Cayley representation and then converts it into an explicit group.
-
-Therefore, the same finite-enumeration requirements apply.
+For an infinite group, however, the enumeration will not terminate naturally; the `max_elements` limit is therefore important.
 
 ---
 
-# Inspecting a presentation
+# Presentation notation
 
-The generator names can be inspected using:
+The string representation of a presented group is:
 
-```python
-G.generators_names
+```text
+〈 generators | relations 〉
 ```
 
 For example:
 
 ```python
-G.generators_names
-# ['a', 'b']
-```
+G = PresentedGroup(
+    ["a", "b"],
+    ["aaa", "bb", "abAB"]
+)
 
-The defining relations are stored in:
-
-```python
-G.relations
-```
-
-The complete presentation can be displayed with:
-
-```python
 print(G)
 ```
 
-For example:
+produces a presentation in the style:
 
 ```text
-〈 a, b | aa, bbb 〉
+〈 a, b | aaa, bb, abAB 〉
 ```
 
-The `__repr__` representation is the same as the string representation.
+This is the standard mathematical notation:
+
+$$
+\langle a,b\mid a^3,b^2,aba^{-1}b^{-1}\rangle.
+$$
+
+The Python representation uses uppercase letters for inverses rather than writing exponent `-1`.
 
 ---
 
-# Membership
-
-A word can be tested for membership in a `PresentedGroup` using `in`.
-
-For example:
-
-```python
-"a" in G
-```
-
-or:
-
-```python
-Word("ab") in G
-```
-
-The element is first interpreted as a valid word using the generators and their inverses.
-
-If the object cannot be interpreted as a valid word, membership returns `False`.
-
----
-
-# A complete example
-
-The following example constructs the cyclic group of order $3$, performs operations using its presentation, and converts it into a Cayley group.
+# Complete example
 
 ```python
 from groupsmath.presentations import Word, PresentedGroup
 
-a = Word("a")
-
+# The cyclic group C3
 C3 = PresentedGroup(
-    [a],
-    [a**3]
+    ["a"],
+    ["aaa"]
 )
 
 print(C3)
-# 〈 a | aaa 〉
-
-print(C3.identity())
-# e
-
 print(C3.operation("a", "aa"))
-# e
-
 print(C3.inverse("a"))
-# aa
+print(C3.order())
 
-C3_cayley = C3.toCayleyGroup()
-
-print(C3_cayley.order())
-# 3
-
-C3_cayley.cayley_table(
-    title="Cyclic group C3"
+# A group with two generators
+G = PresentedGroup(
+    ["a", "b"],
+    [
+        "aaa",     # a^3 = e
+        "bb",      # b^2 = e
+        "abAB"     # aba^{-1}b^{-1} = e
+    ]
 )
+
+print(G)
+
+C = G.toCayleyGroup(max_elements=100)
+
+print("Order:", C.order())
+print("Elements:", C.elements())
 ```
 
-The presentation
+---
+
+# Important implementation limitations
+
+The presentation machinery is currently under development, and its reduction system should not be interpreted as a complete general-purpose implementation of the word problem for finitely presented groups.
+
+In particular:
+
+### Rewriting is heuristic
+
+The module generates shortening rules from the relations and repeatedly applies them. A reduced word is therefore a word that the current rewriting system can no longer shorten.
+
+It is not necessarily a mathematically unique normal form for every possible presentation.
+
+### Finite enumeration is bounded
+
+`toCayleyGroup()` stops with an error once the number of discovered elements reaches `max_elements`.
+
+### Infinite groups cannot be completely enumerated
+
+A presentation may define an infinite group. In that case, complete Cayley-table construction is impossible.
+
+### Enumeration can be expensive
+
+The BFS explores words generated by all generators and their inverses. Even finite groups can become expensive to enumerate as their order grows.
+
+---
+
+## Summary
+
+The `groupsmath.presentations` module provides:
+
+- `Word` objects for group words;
+- lowercase generators and uppercase inverses;
+- word multiplication and powers;
+- word inversion;
+- free reduction;
+- rewriting from defining relations;
+- `PresentedGroup` objects;
+- group multiplication and inverses;
+- BFS enumeration;
+- conversion to `CayleyGroup`;
+- conversion to `ExplicitGroup`;
+- order calculation for enumerable finite groups;
+- a mathematical presentation representation.
+
+The central workflow is:
+
+```text
+Presentation
+    │
+    ▼
+Generators + Relations
+    │
+    ▼
+Word
+    │
+    ├── free reduction
+    │
+    └── relation reduction
+            │
+            ▼
+       reduced words
+            │
+            ▼
+          BFS
+            │
+            ▼
+       CayleyGroup
+            │
+            ├── ExplicitGroup
+            └── group operations
+```
+
+The module therefore acts as a bridge between the compact mathematical description
 
 $$
-\langle a\mid a^3\rangle
+\langle X\mid R\rangle
 $$
 
-therefore provides a compact way of specifying a group through generators and relations, while `toCayleyGroup()` provides a bridge from this symbolic representation to the finite Cayley-table representation used elsewhere in GroupMaker.
+and the explicit finite-group machinery already present elsewhere in `GroupsMath`.
