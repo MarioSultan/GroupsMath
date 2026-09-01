@@ -76,6 +76,9 @@ nav:
   - Structure:
       - Structure description ⚠️: Structure.md
 
+  - Shortcuts:
+      - Shortcuts: Shortcuts.md
+
 extra_css:
   - stylesheets/extra.css
 
