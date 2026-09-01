@@ -4,7 +4,7 @@
 [![PyPI Version](https://img.shields.io/pypi/v/groupsmath?color=2A646E)](https://pypi.org/project/groupsmath/)
 [![Python Versions](https://img.shields.io/pypi/pyversions/groupsmath?color=2A646E)](https://pypi.org/project/groupsmath/)
 ![Last Commit](https://img.shields.io/github/last-commit/MarioSultan/groupsmath?color=2A646E)
-![coverage](https://img.shields.io/badge/road%20to%20v1.0.0-90%25-yellowgreen?color=2A646E)
+![coverage](https://img.shields.io/badge/road%20to%20v1.0.0-95%25-yellowgreen?color=2A646E)
 <!-- ![GitHub Stars](https://img.shields.io/github/stars/MarioSultan/groupsmath?style=social) -->
 
 
