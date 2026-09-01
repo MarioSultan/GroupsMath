@@ -68,6 +68,10 @@ nav:
       
   - Matrix groups:
       - Matrix groups: Matrix_groups.md
+      - Finite fields: Finite_fields.md
+      
+  - Presented groups:
+      - Presentations ⚠️: Presentations.md
 
 extra_css:
   - stylesheets/extra.css
