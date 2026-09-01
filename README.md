@@ -1,4 +1,4 @@
-# GroupsMath – v0.7.0rc
+# GroupsMath – v0.7.0 – release candidate for v1.0.0
 
 [![PyPI Downloads](https://img.shields.io/pypi/dm/groupsmath)](https://pypistats.org/packages/groupsmath)
 [![PyPI Version](https://img.shields.io/pypi/v/groupsmath?color=2A646E)](https://pypi.org/project/groupsmath/)
