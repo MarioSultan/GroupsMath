@@ -73,6 +73,9 @@ nav:
   - Presented groups:
       - Presentations ⚠️: Presentations.md
 
+  - Structure:
+      - Structure description ⚠️: Structure.md
+
 extra_css:
   - stylesheets/extra.css
 
