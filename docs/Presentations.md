@@ -1,6 +1,6 @@
 # Group presentations
 
-> **Experimental feature:** `groupsmath.presentations` is currently under development and may produce errors or unexpected behavior. The API and implementation may also change in future versions.
+![Experimental feature](https://raw.githubusercontent.com/MarioSultan/GroupsMath/main/expf.png)
 
 GroupMaker provides experimental support for groups defined by generators and relations through the `PresentedGroup` class.
 
