@@ -17,6 +17,8 @@ The project aims to provide a **simple** and **intuitive** interface for working
 
 ![Examples](https://raw.githubusercontent.com/MarioSultan/GroupsMath/main/imgs/examples.png)
 
+[![Launch Binder](https://raw.githubusercontent.com/MarioSultan/GroupsMath/main/imgs/here.png)](https://mybinder.org/v2/gh/MarioSultan/GroupsMath/main?labpath=GroupsMath_demo.ipynb)
+
 > Visit here the [GroupsMath official documentation](https://groupsmath.readthedocs.io/en/latest/).
 
 > **⚠️ Notice:** Version v1.0.0 is nearing its official release.
