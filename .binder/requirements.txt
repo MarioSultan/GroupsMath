@@ -1,0 +1,5 @@
+groupsmath
+jupyter
+matplotlib
+numpy
+networkx
