@@ -2,6 +2,8 @@
 
 GroupsMath allows you to visualize the Cayley table of a `Group` object using `matplotlib.pyplot`.
 
+![S3 table](https://raw.githubusercontent.com/MarioSultan/GroupsMath/main/imgs/cayley_S3.png)
+
 The Cayley table contains the result of the group operation for every ordered pair of elements. GroupsMath provides a dedicated method for displaying this information graphically.
 
 ---
