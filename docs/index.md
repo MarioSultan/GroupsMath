@@ -6,6 +6,8 @@
 
 It is designed to provide an intuitive interface for exploring concepts from group theory computationally.
 
+---
+
 ## Installation
 
 To install GroupsMath from PyPI, write in the terminal the following:
@@ -13,6 +15,12 @@ To install GroupsMath from PyPI, write in the terminal the following:
 ```bash
 pip install groupsmath
 ```
+
+If you want to try GroupsMath before installing anything, click this button:
+
+[![Launch Binder](https://raw.githubusercontent.com/MarioSultan/GroupsMath/main/imgs/here.png)](https://mybinder.org/v2/gh/MarioSultan/GroupsMath/main?labpath=GroupsMath_demo.ipynb)
+
+---
 
 ## Getting started
 
@@ -23,6 +31,8 @@ from groupsmath import *
 ```
 
 From there, you can construct groups, perform operations on their elements, investigate subgroups, automorphisms, products, and other structures.
+
+---
 
 ## Documentation
 
@@ -55,11 +65,15 @@ From there, you can construct groups, perform operations on their elements, inve
 ### Shortcuts
 - [Shortcuts](Shortcuts.md)
 
+---
+
 ## Project
 
 GroupsMath is an open-source project developed in Python.
 
 The source code is available on [GitHub](https://github.com/MarioSultan/GroupsMath).
+
+---
 
 ## License
 
