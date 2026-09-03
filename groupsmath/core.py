@@ -21,7 +21,7 @@ from    math                import  gcd
 
 #################### DEFINITIONS ####################
 
-__version__ = "0.7.1"
+__version__ = "0.7.2"
 __errorcolor__ = "\033[31m"
 
 tgl_color = "#2A646E"
@@ -29,6 +29,8 @@ white = mcolors.LinearSegmentedColormap.from_list("white", ["white", "white"])
 tgl = mcolors.LinearSegmentedColormap.from_list("tgl", ["white", tgl_color])
 rainbow = mcolors.LinearSegmentedColormap.from_list("rainbow", ["#FF0000","#FF9100","#F2DA00","#2CDB00","#00DAE9","#1869FF"])#,"#7648FF","#D12BFF"])
 rainbow8 = mcolors.LinearSegmentedColormap.from_list("rainbow8", ["#FF0000","#FF9100","#F2DA00","#2CDB00","#00DAE9","#1869FF","#7648FF","#FF1FF4"])
+
+standard = ["#FF0000", "#1869FF", "#2CDB00", "#F2DA00", "#7648FF", "#FF9100", "#00DAE9", "#FF1FF4", "#000000", "#888888"]
 
 def groupsmath_info():
     print("———————————————————————————————————————————————————————————————————————————")
@@ -183,6 +185,9 @@ class ExplicitGroup(Group):
 
     def cayley_table(self, title="", colormap=rainbow, names=None, math_mode=True):
         return self.toCayleyGroup().cayley_table(title=title, colormap=colormap, names=names, math_mode=math_mode)
+
+    def cayley_graph(self, generators=None, title="", colormap=standard, names=None, edgenames=None, math_mode=True, node_size=1000):
+        return self.toCayleyGroup.cayley_graph(generators=generators, title=title, colormap=colormap, names=names, edgenames=edgenames, math_mode=math_mode, node_size=node_size)
 
     #–> SUBGROUPS 
 
@@ -560,6 +565,47 @@ class CayleyGroup(Group):
 
     def delete_names(self):
         self.elements = [i for i in range(len(self.elements))]
+
+    def cayley_graph(self, generators=None, title="", colormap=standard, names=None, edgenames=None, math_mode=True, node_size=1000):
+
+        import networkx as nx
+
+        if generators==None:
+            generators = self.generators()
+        else:
+            if not self.generates(generators):
+                raise ValueError(__errorcolor__+"The set provided does not generate the group.")
+
+        if names==None:
+            if len(self)<=20:
+                names=True
+            else:
+                names=False
+
+        gr = nx.DiGraph()
+
+        if math_mode:
+            for i in self.elements:
+                gr.add_node("$"+str(i)+"$")
+            for i in self.elements:
+                for j in range(len(generators)):
+                    gr.add_edge("$"+str(i)+"$","$"+str(self.operation(i,generators[j]))+"$",label=generators[j], color=colormap[j])
+        else:
+            for i in self.elements:
+                gr.add_node(str(i))
+            for i in self.elements:
+                for j in range(len(generators)):
+                    gr.add_edge(str(i),str(self.operation(i,generators[j])),label=generators[j], color=colormap[j])
+
+
+        colors = [gr.edges[u, v]["color"]for u, v in gr.edges]
+
+        pos = nx.spring_layout(gr)
+        if names:
+            nx.draw(gr,pos,with_labels=True, node_color="white", edgecolors="black", edge_color=colors, width=3, node_size=node_size)
+        else:
+            nx.draw(gr,pos,with_labels=False, node_color="black", edge_color=colors, width=3, node_size=250)
+        plt.show()
 
     #–> SUBGROUPS 
 
@@ -1186,6 +1232,9 @@ class Element:
     def inverse(self):
         inv = self.group.inverse(self.element)
         return Element(inv, self.group)
+
+    def order(self):
+        return self.group.element_orders()[self.index]
 
 class Automorphism:
 
