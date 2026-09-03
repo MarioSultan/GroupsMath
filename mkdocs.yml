@@ -59,6 +59,7 @@ nav:
       - Group operations and properties: Group_operations_and_properties.md
       - Elements: Elements.md
       - Cayley table visualization: Cayley_table_visualization.md
+      - Cayley graphs visualization: Cayley_graphs.md
 
   - Advanced group methods:
       - Subgroups: Subgroups.md
