@@ -43,6 +43,7 @@ From there, you can construct groups, perform operations on their elements, inve
 - [Group operations and properties](Group_operations_and_properties.md)
 - [Elements](Elements.md)
 - [Cayley table visualization](Cayley_table_visualization.md)
+- [Cayley graphs](Cayley_graphs.md)
 
 ### Advanced group methods
 
