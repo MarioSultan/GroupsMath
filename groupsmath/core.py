@@ -21,7 +21,7 @@ from    math                import  gcd
 
 #################### DEFINITIONS ####################
 
-__version__ = "0.7.2"
+__version__ = "0.7.1"
 __errorcolor__ = "\033[31m"
 
 tgl_color = "#2A646E"
@@ -582,6 +582,12 @@ class CayleyGroup(Group):
             else:
                 names=False
 
+        if edgenames==None:
+            if len(self)<=20:
+                edgenames=True
+            else:
+                edgenames=False       
+
         gr = nx.DiGraph()
 
         if math_mode:
@@ -600,11 +606,20 @@ class CayleyGroup(Group):
 
         colors = [gr.edges[u, v]["color"]for u, v in gr.edges]
 
+        if edgenames:
+            edge_labels = nx.get_edge_attributes(gr, "label")
+        else:
+            edge_labels = []
+
         pos = nx.spring_layout(gr)
+        
         if names:
             nx.draw(gr,pos,with_labels=True, node_color="white", edgecolors="black", edge_color=colors, width=3, node_size=node_size)
+            nx.draw_networkx_edge_labels(gr, pos, edge_labels=edge_labels)
         else:
             nx.draw(gr,pos,with_labels=False, node_color="black", edge_color=colors, width=3, node_size=250)
+
+        plt.title(title)
         plt.show()
 
     #–> SUBGROUPS 
@@ -751,6 +766,50 @@ class CayleyGroup(Group):
 
     def is_solvable(self):
         return len(self.derived_series()[-1]) == 1
+
+    def _hasse_diagram(self):        # UNDER DEVELOPMENT
+
+        import networkx as nx
+        from groupsmath.structure import structure_description
+
+        S = self.subgroups()
+        N = []      # name
+        R = []      # ratio
+        for i in S:
+            N.append(structure_description(i))
+            R.append(int(len(self)/len(i)))
+
+        o = []
+        i = 0
+        while i<len(R):
+            if R[i] not in o:
+                o.append(R[i])
+            i+=1
+
+        O = {o[i]:i for i in range(len(o))}
+
+        print(N,R,o,O,sep="\n")
+
+        H = []
+        for i in range(len(o)):
+            H.append([])
+
+        for i in range(len(S)):
+            H[O[R[i]]].append(S[i])
+
+        ### Hasta aquí, H es una lista con los subgrupos clasificados por niveles.
+
+        for i in S:
+            for j in S:
+                if i._is_covered(j):
+                    print(structure_description(i),"covers",structure_description(j))
+                else:
+                    print(structure_description(i),"don't covers",structure_description(j))
+
+
+
+
+
 
     #–> AUTOMORPHISMS 
 
@@ -1108,6 +1167,26 @@ class CayleySubgroup(CayleyGroup, Subgroup):
 
     def __lt__(self, group):
         return group==self.group and self.subgroup.order()<self.group.order()
+
+    def _isin(self, subgroup):
+        if not isinstance(subgroup, CayleySubgroup):
+            return False
+
+        return set(self._indices).issubset(set(subgroup._indices))
+
+    def _is_covered(self, other):
+        """Comprueba si other cubre a self en el retículo de subgrupos."""
+        if (not self._isin(other)) or self == other:
+            return False
+
+        for intermediate in other.group.subgroups():
+            if (self._isin(intermediate)
+                    and intermediate._isin(other)
+                    and intermediate != self
+                    and intermediate != other):
+                return False
+
+        return True
 
     #–> QUOTIENTS 
 
