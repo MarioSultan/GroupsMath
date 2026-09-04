@@ -107,6 +107,7 @@ GroupsMath is designed to provide tools for working with finite (and infinite) g
 * Quotient groups $Q=G/H$.
 * Conmutator and derived subgroups $G'$.
 * Abelianization $G/G'$
+* Hasse diagrams. (*experimental feature*)
 
 **AUTOMORPHISMS:**
 * Class `Automorphism` and automorphism functions.
