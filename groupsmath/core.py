@@ -47,7 +47,7 @@ def groupsmath_info():
     print("· GitHub \033[36mhttps://github.com/MarioSultan/GroupsMath \033[0m                        ")
     print("                                                                           ")
     print("The documentation of this library is in the following link:                ")
-    print("· Documentation \033[36mhttps://github.com/MarioSultan/GroupsMath/tree/main/docs \033[0m  ")
+    print("· Documentation \033[36mhttps://groupsmath.readthedocs.io/en/latest/ \033[0m  ")
     print("                                                                           ")
     print("———————————————————————————————————————————————————————————————————————————")
 
@@ -767,7 +767,7 @@ class CayleyGroup(Group):
     def is_solvable(self):
         return len(self.derived_series()[-1]) == 1
 
-    def _hasse_diagram(self):        # UNDER DEVELOPMENT
+    def hasse_diagram(self):
 
         import networkx as nx
         from groupsmath.structure import structure_description
@@ -776,7 +776,7 @@ class CayleyGroup(Group):
         N = []      # name
         R = []      # ratio
         for i in S:
-            N.append(structure_description(i))
+            N.append(structure_description(i.subgroup))
             R.append(int(len(self)/len(i)))
 
         o = []
@@ -788,8 +788,6 @@ class CayleyGroup(Group):
 
         O = {o[i]:i for i in range(len(o))}
 
-        print(N,R,o,O,sep="\n")
-
         H = []
         for i in range(len(o)):
             H.append([])
@@ -797,15 +795,95 @@ class CayleyGroup(Group):
         for i in range(len(S)):
             H[O[R[i]]].append(S[i])
 
-        ### Hasta aquí, H es una lista con los subgrupos clasificados por niveles.
+        #print(f"N = {N}",f"R = {R}",f"o = {o}",f"O = {O}",f"H = {H}",sep="\n")
 
-        for i in S:
-            for j in S:
-                if i._is_covered(j):
-                    print(structure_description(i),"covers",structure_description(j))
-                else:
-                    print(structure_description(i),"don't covers",structure_description(j))
+        ########## Nodos y aristas ##########
 
+        gr = nx.DiGraph()
+
+        for i in range(len(S)):
+            gr.add_node(i,label=structure_description(S[i].subgroup))
+
+        for i in range(len(S)):
+            for j in range(i,len(S)):
+                if S[i]._is_covered(S[j]):
+                    gr.add_edge(i,j)
+
+            ########## Posiciones ##########
+
+        pos = {}
+
+        dx = 2
+        dy = 2
+        min_distance = dx
+
+        # 1. Posiciones iniciales, distribuidas uniformemente
+        for level, subgroups in enumerate(H):
+
+            n = len(subgroups)
+            offset = -(n - 1) * dx / 2
+
+            for k, subgroup in enumerate(subgroups):
+
+                node = S.index(subgroup)
+
+                pos[node] = (
+                    offset + k * dx,
+                    level * dy
+                )
+
+
+        # 2. Ajustar cada nodo según sus predecesores
+        for level in range(1, len(H)):
+
+            for subgroup in H[level]:
+
+                node = S.index(subgroup)
+
+                predecessors = list(gr.predecessors(node))
+
+                if not predecessors:
+                    continue
+
+                # Posición ideal: media de los predecesores
+                ideal_x = np.mean([
+                    pos[p][0]
+                    for p in predecessors
+                ])
+
+                y = level * dy
+
+                # --------------------------------------------------
+                # Buscar una posición libre alrededor de ideal_x
+                # --------------------------------------------------
+
+                x = ideal_x
+
+                occupied = [
+                    p[0]
+                    for n, p in pos.items()
+                    if p[1] == y
+                ]
+
+                # Si está demasiado cerca de otro nodo,
+                # desplazamos alternativamente izquierda/derecha.
+                k = 0
+
+                while any(abs(x - ox) < min_distance for ox in occupied):
+
+                    k += 1
+
+                    if k % 2 == 1:
+                        x = ideal_x + ((k + 1) // 2) * dx
+                    else:
+                        x = ideal_x - (k // 2) * dx
+
+                pos[node] = (x, y)
+
+        labels = nx.get_node_attributes(gr, "label")
+        nx.draw(gr, pos, with_labels=True, labels=labels, node_shape="s", node_color="white", edgecolors="black", node_size=1000, arrows=False)
+        #nx.draw_networkx_edges(gr,pos,arrows=False)
+        plt.show()
 
 
 
@@ -1175,15 +1253,18 @@ class CayleySubgroup(CayleyGroup, Subgroup):
         return set(self._indices).issubset(set(subgroup._indices))
 
     def _is_covered(self, other):
-        """Comprueba si other cubre a self en el retículo de subgrupos."""
-        if (not self._isin(other)) or self == other:
+        if not self._isin(other):
+            return False
+
+        if set(self._indices) == set(other._indices):
             return False
 
         for intermediate in other.group.subgroups():
-            if (self._isin(intermediate)
-                    and intermediate._isin(other)
-                    and intermediate != self
-                    and intermediate != other):
+            # Comprobamos que no sea idéntico en contenido a self ni a other
+            if set(intermediate._indices) == set(self._indices) or set(intermediate._indices) == set(other._indices):
+                continue
+                
+            if self._isin(intermediate) and intermediate._isin(other):
                 return False
 
         return True
