@@ -67,6 +67,9 @@ From there, you can construct groups, perform operations on their elements, inve
 ### Shortcuts
 - [Shortcuts](Shortcuts.md)
 
+### More information
+- [GroupsMath internal API](Internal_API.md)
+
 ---
 
 ## Project
