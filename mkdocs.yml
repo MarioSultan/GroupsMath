@@ -66,6 +66,7 @@ nav:
       - Automorphisms: Automorphisms.md
       - Products: Products.md
       - Conjugation and commutators: Conjugation_and_commutators.md
+      - Hasse diagramas ⚠️: Hasse_diagrams.md
       
   - Matrix groups:
       - Matrix groups: Matrix_groups.md
