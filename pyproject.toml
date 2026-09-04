@@ -4,7 +4,7 @@ build-backend = "setuptools.build_meta"
 
 [project]
 name = "GroupsMath"            # Nombre en PyPI 
-version = "0.7.1"
+version = "0.7.2"
 description = "The educational Python library for Group Theory"
 readme = "README.md"                  # Esta será la documentación visible en la portada de PyPI
 requires-python = ">=3.8"
