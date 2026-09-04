@@ -21,7 +21,7 @@ from    math                import  gcd
 
 #################### DEFINITIONS ####################
 
-__version__ = "0.7.1"
+__version__ = "0.7.2"
 __errorcolor__ = "\033[31m"
 
 tgl_color = "#2A646E"
