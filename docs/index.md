@@ -51,6 +51,7 @@ From there, you can construct groups, perform operations on their elements, inve
 - [Automorphisms](Automorphisms.md)
 - [Products](Products.md)
 - [Conjugation and commutators](Conjugation_and_commutators.md)
+- [Hasse diagrams (*experimental feature*)](Hasse_diagrams.md)
 
 ### Matrix groups
 
