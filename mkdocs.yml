@@ -66,17 +66,17 @@ nav:
       - Automorphisms: Automorphisms.md
       - Products: Products.md
       - Conjugation and commutators: Conjugation_and_commutators.md
-      - Hasse diagramas ⚠️: Hasse_diagrams.md
+      - Hasse diagramas *: Hasse_diagrams.md
       
   - Matrix groups:
       - Matrix groups: Matrix_groups.md
       - Finite fields: Finite_fields.md
       
   - Presented groups:
-      - Presentations ⚠️: Presentations.md
+      - Presentations *: Presentations.md
 
   - Structure:
-      - Structure description ⚠️: Structure.md
+      - Structure description *: Structure.md
 
   - Shortcuts:
       - Shortcuts: Shortcuts.md
