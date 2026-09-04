@@ -81,6 +81,9 @@ nav:
   - Shortcuts:
       - Shortcuts: Shortcuts.md
 
+  - More information:
+      - GroupsMath internal API: Internal_API.md
+
 extra_css:
   - stylesheets/extra.css
 
