@@ -1,4 +1,4 @@
-# GroupsMath – v0.7.1 – release candidate for v1.0.0
+# GroupsMath – v0.7.2 – release candidate for v1.0.0
 
 [![PyPI Downloads](https://img.shields.io/pypi/dm/groupsmath)](https://pypistats.org/packages/groupsmath)
 [![PyPI Version](https://img.shields.io/pypi/v/groupsmath?color=2A646E)](https://pypi.org/project/groupsmath/)
@@ -28,7 +28,7 @@ The project aims to provide a **simple** and **intuitive** interface for working
 
 ## Installation
 
-GroupsMath is currently distributed through [PyPI](https://pypi.org/project/GroupsMath/) and [Github](https://github.com/MarioSultan/GroupsMath). To install the latest released version from PyPI, run:
+GroupsMath is currently distributed through [PyPI](https://pypi.org/project/GroupsMath/) and [Github](https://github.com/MarioSultan/GroupsMath). To install the latest released version from PyPI, run the following in your preferred terminal (VS code, Jupyter, ...).
 
 ```bash
 pip install groupsmath
