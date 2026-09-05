@@ -10,13 +10,13 @@
 ![GroupsMath Logo](https://raw.githubusercontent.com/MarioSultan/GroupsMath/main/logo.png)
 
 
-**GroupsMath** is a Python module for constructing, studying, and manipulating finite and infinite groups.
+**GroupsMath** is an open-source Python library for exploring and computing with mathematical groups. It lets you construct groups, perform operations on their elements, and study their structure through concepts such as subgroups, quotient groups, products, automorphisms, and conjugacy classes. Its goal is to make group theory **accessible, intuitive, and computational**, connecting abstract mathematics with hands-on experimentation in Python.
 
-The project aims to provide a **simple** and **intuitive** interface for working with groups and their algebraic properties.
 
 ![Examples](https://raw.githubusercontent.com/MarioSultan/GroupsMath/main/imgs/examples.png)
 
-> 📚 Visit here the [GroupsMath official documentation](https://groupsmath.readthedocs.io/en/latest/).
+
+📚 Visit here the [GroupsMath official documentation](https://groupsmath.readthedocs.io/en/latest/).
 
 
 ---
