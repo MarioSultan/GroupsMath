@@ -1,10 +1,9 @@
-# GroupsMath – v0.7.2 – release candidate for v1.0.0
+# GroupsMath – v1.0.0
 
 [![PyPI Downloads](https://img.shields.io/pypi/dm/groupsmath)](https://pypistats.org/packages/groupsmath)
 [![PyPI Version](https://img.shields.io/pypi/v/groupsmath?color=2A646E)](https://pypi.org/project/groupsmath/)
 [![Python Versions](https://img.shields.io/pypi/pyversions/groupsmath?color=2A646E)](https://pypi.org/project/groupsmath/)
 ![Last Commit](https://img.shields.io/github/last-commit/MarioSultan/groupsmath?color=2A646E)
-![coverage](https://img.shields.io/badge/road%20to%20v1.0.0-97%25-yellowgreen?color=2A646E)
 <!-- ![GitHub Stars](https://img.shields.io/github/stars/MarioSultan/groupsmath?style=social) -->
 
 
@@ -17,7 +16,7 @@ The project aims to provide a **simple** and **intuitive** interface for working
 
 ![Examples](https://raw.githubusercontent.com/MarioSultan/GroupsMath/main/imgs/examples.png)
 
-> Visit here the [GroupsMath official documentation](https://groupsmath.readthedocs.io/en/latest/).
+> 📚 Visit here the [GroupsMath official documentation](https://groupsmath.readthedocs.io/en/latest/).
 
 
 ---
@@ -93,7 +92,7 @@ GroupsMath is designed to provide tools for working with finite (and infinite) g
 **GROUPS:**
 * Construction of finite groups with classes `CayleyGroup` and `ExplicitGroup`.
 * Determination of the order of a group and its elements.
-* Operation with group elements (multiplication, inverse, powers, ...)
+* Operation with group elements (multiplication, inverse, powers, ...).
 * Computation of Cayley tables with `matplotlib.pyplot`.
 * Detection of algebraic properties such as cyclicity, commutativity and solubility.
 * Centralizers, conjugacy classes and conmutator.
@@ -106,7 +105,7 @@ GroupsMath is designed to provide tools for working with finite (and infinite) g
 * Normal subgroups.
 * Quotient groups $Q=G/H$.
 * Conmutator and derived subgroups $G'$.
-* Abelianization $G/G'$
+* Abelianization $G/G'$.
 * Hasse diagrams. (*experimental feature*)
 
 **AUTOMORPHISMS:**
@@ -125,6 +124,10 @@ GroupsMath is designed to provide tools for working with finite (and infinite) g
 
 **PRESENTED GROUPS**
 * Presentation of groups, generators and class `PresentedGroup`. (*experimental feature*)
+
+**EDUCATION**
+* Jupyter notebook [A swift introduction to group theory with *GroupsMath*](https://mybinder.org/v2/gh/MarioSultan/GroupsMath/main?labpath=GroupsMath_demo.ipynb) in Binder.
+
 
 The available functionality will expand as the project develops.
 
