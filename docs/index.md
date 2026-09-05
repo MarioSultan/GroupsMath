@@ -2,9 +2,8 @@
 
 ![GroupsMath Logo](https://raw.githubusercontent.com/MarioSultan/GroupsMath/main/logo.png)
 
-**GroupsMath** is an educational Python library for constructing, studying, and manipulating groups.
+**GroupsMath** is an open-source Python library designed to make group theory computational, intuitive, and accessible. It allows you to construct mathematical groups, work directly with their elements, and explore their structure through computations: from basic properties such as element orders, inverses, centers, and commutativity to more advanced concepts such as subgroups, cosets, quotient groups, automorphisms, direct and semidirect products, conjugacy classes, commutators, and matrix groups. GroupsMath also provides ready-to-use families of common groups and tools for visualizing Cayley tables, making it possible to move naturally between abstract mathematical ideas and concrete computational experiments. Its main goal is to provide a practical environment where group theory can be explored, tested, and understood through Python, whether for learning, teaching, experimentation, or mathematical computation.
 
-It is designed to provide an intuitive interface for exploring concepts from group theory computationally.
 
 ---
 
