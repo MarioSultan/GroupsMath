@@ -21,7 +21,7 @@ from    math                import  gcd
 
 #################### DEFINITIONS ####################
 
-__version__ = "0.7.2"
+__version__ = "1.0.0"
 __errorcolor__ = "\033[31m"
 
 tgl_color = "#2A646E"
@@ -183,11 +183,11 @@ class ExplicitGroup(Group):
     def is_abelian(self):
         return self.order()==len(self.center())
 
-    def cayley_table(self, title="", colormap=rainbow, names=None, math_mode=True):
-        return self.toCayleyGroup().cayley_table(title=title, colormap=colormap, names=names, math_mode=math_mode)
+    def cayley_table(self, **kwargs):
+        return self.toCayleyGroup().cayley_table(**kwargs)
 
-    def cayley_graph(self, generators=None, title="", colormap=standard, names=None, edgenames=None, math_mode=True, node_size=1000):
-        return self.toCayleyGroup.cayley_graph(generators=generators, title=title, colormap=colormap, names=names, edgenames=edgenames, math_mode=math_mode, node_size=node_size)
+    def cayley_graph(self, **kwargs):
+        return self.toCayleyGroup().cayley_graph(**kwargs)
 
     #–> SUBGROUPS 
 
@@ -336,6 +336,9 @@ class ExplicitGroup(Group):
 
     def is_solvable(self):
         return len(self.derived_series()[-1]) == 1
+
+    def hasse_diagram(self):
+        self.toCayleyGroup().hasse_diagram()
     
     #–> AUTOMORPHISMS 
 
@@ -365,6 +368,9 @@ class ExplicitGroup(Group):
         subset_indices = [self.elements.index(e) for e in subset]
         sub_indices = _subgroup_generated_by(cayley_grp.cayley, subset_indices)
         return len(sub_indices) == len(self)
+
+    def rank(self):
+        return len(self.generators())
 
     #-> ISOMORPHISMS
 
@@ -885,10 +891,6 @@ class CayleyGroup(Group):
         #nx.draw_networkx_edges(gr,pos,arrows=False)
         plt.show()
 
-
-
-
-
     #–> AUTOMORPHISMS 
 
     def is_automorphism(self, phi):
@@ -1020,6 +1022,9 @@ class CayleyGroup(Group):
         sub_indices = _subgroup_generated_by(self.cayley, subset_indices)
         return len(sub_indices) == self.order()
 
+    def rank(self):
+        return len(self.generators())
+
     #-> ISOMORPHISMS
 
     def is_isomorphic_to(self, target):         #Revisar, pues es demasiado grande y algo puede salir mal
@@ -1137,6 +1142,17 @@ class ExplicitSubgroup(ExplicitGroup, Subgroup):
 
     def __lt__(self, group):
         return group == self.group and self.subgroup.order() < self.group.order()
+
+    #-> GRAPHS
+
+    def cayley_table(self, **kwargs):
+        return self.subgroup.cayley_table(**kwargs)
+
+    def cayley_graph(self, **kwargs):
+        return self.subgroup.cayley_graph(**kwargs)
+
+    def hasse_diagram(self, **kwargs):
+        return self.subgroup.hasse_diagram(**kwargs)
 
     #–> QUOTIENTS & COSETS
 
@@ -1268,6 +1284,17 @@ class CayleySubgroup(CayleyGroup, Subgroup):
                 return False
 
         return True
+
+    #-> GRAPHS
+
+    def cayley_table(self, **kwargs):
+        return self.subgroup.cayley_table(**kwargs)
+
+    def cayley_graph(self, **kwargs):
+        return self.subgroup.cayley_graph(**kwargs)
+
+    def hasse_diagram(self, **kwargs):
+        return self.subgroup.hasse_diagram(**kwargs)
 
     #–> QUOTIENTS 
 
@@ -1435,12 +1462,6 @@ class AutomorphismFunction:
 
 #################### HIDDEN FUNCTIONS ####################
 
-def _obtener_nombre(var_obj):
-    for nombre, valor in globals().items():
-        if valor is var_obj:
-            return nombre
-    return None
-
 def _is_closed(tabla):
     n = len(tabla)
     E = _get_elements(tabla)
@@ -1581,24 +1602,6 @@ def _check_explicit_group(elements: list, operation) -> tuple[bool, str]:
 
     return True, "Valid Group"
 
-def _identity(G):
-    neutro = None
-    for e in range(len(G)):
-        ok = True
-        for a in range(len(G)):
-            if G[e][a] != a:
-                ok = False
-                break
-            if G[a][e] != a:
-                ok = False
-                break
-        if ok:
-            neutro = e
-            break
-    if neutro is None:
-        return (False,"IndentityError – no identity element found")
-    return neutro
-
 def _subset(G, elements):
     return [[G[r][c] for c in elements] for r in elements]
 
@@ -1725,24 +1728,6 @@ def _subgroup_generated_by(cayley, generators_indices):
                 queue.append(prod2)
                 
     return sorted(list(generated))
-
-def _order_preserving_permutations(orders):
-
-    classes = {}
-
-    for i, order in enumerate(orders):
-        classes.setdefault(order, []).append(i)
-
-    classes = list(classes.values())
-
-    for perms in product(*(permutations(c) for c in classes)):
-        result = list(range(len(orders)))
-
-        for domain, image in zip(classes, perms):
-            for x, y in zip(domain, image):
-                result[x] = y
-
-        yield tuple(result)
 
 
 #################### PRODUCTS ####################
@@ -2010,53 +1995,7 @@ def icosahedral_group():
     return CayleyGroup((alternating_group(5) * cyclic_group(2)).cayley,_skip_validation=True)
 
 
-#################### VISUALIZATION AND RENAMING HELPERS ####################
-
-def cayley_table(G, title="", colormap=rainbow, names="", renaming=[], math_mode=True):
-
-    if title=="":
-        if _obtener_nombre(G)==None:
-            title = f"Cayley table"
-        else:
-            title = f"Cayley table of {_obtener_nombre(G)}"
-    if names=="":
-        if len(G)<=20:
-            names=True
-        else:
-            names=False
-    if renaming==[]:
-        if math_mode:
-            renaming = [rf"${e}$" for e in range(len(G))]
-        else:
-            renaming = [rf"{e}" for e in range(len(G))]
-
-    elements = range(len(G))
-    fig, ax = plt.subplots(figsize=(6, 5))
-    im = ax.imshow(G, cmap=colormap)
-    ax.set_xticks(np.arange(len(elements)))
-    ax.set_yticks(np.arange(len(elements)))
-    ax.set_xticklabels(renaming)
-    ax.set_yticklabels(renaming)
-
-    ax.xaxis.tick_top()
-    
-    if names:
-        for i in range(len(elements)):
-            for j in range(len(elements)):
-                color_texto = "black"
-                ax.text(
-                    i,
-                    j,
-                    f"{renaming[G[j][i]]}",
-                    ha="center",
-                    va="center",
-                    color=color_texto,
-                    fontsize=12,
-                )
-    
-    plt.title(title)
-    plt.tight_layout()
-    plt.show()
+#################### RENAMING HELPERS ####################
 
 def _renaming_C(n):
     r = []
