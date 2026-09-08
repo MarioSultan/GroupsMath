@@ -42,6 +42,7 @@ theme:
     - navigation.expand
     - navigation.top
     - navigation.path
+    - navigation.footer
     - search.suggest
     - search.highlight
     - content.code.copy
